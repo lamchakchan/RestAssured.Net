@@ -2,6 +2,7 @@
 A simple testing suite for REST based interfaces
 
 ## TODO
+- Add hooks for PUT and DELETE verbs
 - Add Json Schema validation
 - Add hooks for testing against Http Meta such as content type, content size and so forth
 - Add features for processing Xml and possibly other formats.
