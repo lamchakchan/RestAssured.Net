@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using NUnit.Framework;
 using RA.Exceptions;
+using RestAssured.Tests.Data;
 
 namespace RA.Tests
 {
@@ -49,11 +51,35 @@ namespace RA.Tests
 
         [Test]
         [ExpectedException(typeof(AssertException))]
-        public void DoesThisBlowUp()
+        public void AccessingMissingNameShouldThrow()
         {
             _response
                 .Test("should blow up", x => x.products[0].name == "")
                 .Assert("should blow up");
+        }
+
+        [Test]
+        public void TestValidSchema()
+        {
+            _response
+                .Schema(Resource.ValidSchema);
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentException))]
+        public void TestInvalidSchema()
+        {
+            _response
+                .Schema(Resource.InvalidSchema);
+        }
+
+        [Test]
+        [ExpectedException(typeof (AssertException))]
+        public void TestRestrictiveSchema()
+        {
+            _response
+                .Schema(Resource.RestrictiveSchema)
+                .AssertSchema();
         }
 
         [Test]
