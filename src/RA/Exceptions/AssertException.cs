@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RestAssured.Exceptions
+namespace RA.Exceptions
 {
     public class AssertException : Exception
     {

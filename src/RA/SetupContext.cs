@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using RestAssured.Extensions;
+using RA.Extensions;
 
-namespace RestAssured
+namespace RA
 {
     public class SetupContext
     {

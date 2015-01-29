@@ -48,9 +48,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RestAssured\RestAssured.csproj">
+    <ProjectReference Include="..\RA\RA.csproj">
       <Project>{c93a3f2d-9db3-4e1e-874c-41750db4b191}</Project>
-      <Name>RestAssured</Name>
+      <Name>RA</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

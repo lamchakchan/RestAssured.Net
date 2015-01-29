@@ -1,4 +1,4 @@
-﻿namespace RestAssured
+﻿namespace RA
 {
     public class RestAssured
     {

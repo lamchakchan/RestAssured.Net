@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RestAssured.Extensions
+namespace RA.Extensions
 {
     public static class ConsoleExtensions
     {

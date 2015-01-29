@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Net;
 using NUnit.Framework;
-using RestAssured.Exceptions;
+using RA.Exceptions;
 
-namespace RestAssured.Tests
+namespace RA.Tests
 {
     [TestFixture]
     public class MockSuite

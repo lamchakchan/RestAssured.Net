@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using Newtonsoft.Json.Linq;
-using RestAssured.Exceptions;
-using RestAssured.Extensions;
+using RA.Exceptions;
+using RA.Extensions;
 
-namespace RestAssured
+namespace RA
 {
     public class ResponseContext
     {

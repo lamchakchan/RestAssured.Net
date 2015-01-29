@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace RestAssured.Tests
+namespace RA.Tests
 {
     [TestFixture]
     public class StorefrontSuite

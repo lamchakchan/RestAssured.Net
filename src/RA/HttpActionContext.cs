@@ -1,7 +1,7 @@
 using System;
-using RestAssured.Extensions;
+using RA.Extensions;
 
-namespace RestAssured
+namespace RA
 {
     public enum HttpActionType
     {

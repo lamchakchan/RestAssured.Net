@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestAssured", "src\RestAssured\RestAssured.csproj", "{C93A3F2D-9DB3-4E1E-874C-41750DB4B191}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RA", "src\RA\RA.csproj", "{C93A3F2D-9DB3-4E1E-874C-41750DB4B191}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestAssured.Tests", "src\RestAssured.Tests\RestAssured.Tests.csproj", "{7555C9B3-DBAB-43B0-B5F3-473823451A88}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RA.Tests", "src\RA.Tests\RA.Tests.csproj", "{7555C9B3-DBAB-43B0-B5F3-473823451A88}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

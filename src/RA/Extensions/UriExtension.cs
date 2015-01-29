@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RestAssured.Extensions
+namespace RA.Extensions
 {
     public static class UriExtension
     {
