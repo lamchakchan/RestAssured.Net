@@ -81,9 +81,9 @@ namespace RestAssured.Tests.Data {
         ///						&quot;type&quot;: &quot;string&quot;,
         ///						&quot;pattern&quot;: &quot;^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0- [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string InvalidSchema {
+        internal static string V3InvalidSchema {
             get {
-                return ResourceManager.GetString("InvalidSchema", resourceCulture);
+                return ResourceManager.GetString("V3InvalidSchema", resourceCulture);
             }
         }
         
@@ -108,9 +108,9 @@ namespace RestAssured.Tests.Data {
         ///						&quot;pattern&quot;: &quot;^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$&quot;,
         ///					 [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string RestrictiveSchema {
+        internal static string V3RestrictiveSchema {
             get {
-                return ResourceManager.GetString("RestrictiveSchema", resourceCulture);
+                return ResourceManager.GetString("V3RestrictiveSchema", resourceCulture);
             }
         }
         
@@ -135,9 +135,36 @@ namespace RestAssured.Tests.Data {
         ///						&quot;pattern&quot;: &quot;^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$&quot;,
         ///					 [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string ValidSchema {
+        internal static string V3ValidSchema {
             get {
-                return ResourceManager.GetString("ValidSchema", resourceCulture);
+                return ResourceManager.GetString("V3ValidSchema", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {
+        ///	&quot;$schema&quot;: &quot;http://json-schema.org/draft-04/schema#&quot;,
+        ///	&quot;type&quot;: &quot;object&quot;,
+        ///	&quot;properties&quot;: {
+        ///		&quot;id&quot; : {
+        ///			&quot;type&quot;: &quot;string&quot;,
+        ///			&quot;pattern&quot;: &quot;^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$&quot;,
+        ///			&quot;minLength&quot;: 1
+        ///		},
+        ///		&quot;products&quot;: {
+        ///			&quot;type&quot;: &quot;array&quot;,
+        ///			&quot;items&quot;:{
+        ///				&quot;type&quot;: &quot;object&quot;,
+        ///				&quot;properties&quot;: {
+        ///					&quot;id&quot;:{
+        ///						&quot;type&quot;: &quot;string&quot;,
+        ///						&quot;pattern&quot;: &quot;^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$&quot;,
+        ///						&quot;minLength&quot;: 1
+        ///					 [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string V4ValidSchema {
+            get {
+                return ResourceManager.GetString("V4ValidSchema", resourceCulture);
             }
         }
     }

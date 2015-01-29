@@ -54,11 +54,13 @@ namespace RA
 
         public ResponseContext Schema(string schema)
         {
-            JsonSchema jsonSchema = null;
+            //JsonSchema jsonSchema = null;
+            JSchema jSchema = null;
 
             try
             {
-                jsonSchema = JsonSchema.Parse(schema);
+                jSchema = JSchema.Parse(schema);
+                //jsonSchema = JsonSchema.Parse(schema);
             }
             catch (Exception ex)
             {
@@ -67,7 +69,7 @@ namespace RA
 
             IList<string> messages;
 
-            _isSchemaValid = JObject.Parse(_content).IsValid(jsonSchema, out messages);
+            _isSchemaValid = JObject.Parse(_content).IsValid(jSchema, out messages);
 
             if (!_isSchemaValid)
             {

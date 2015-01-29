@@ -118,13 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="InvalidSchema" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>invalidschema.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="V3InvalidSchema" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>v3invalidschema.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="RestrictiveSchema" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>restrictiveschema.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="V3RestrictiveSchema" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>v3restrictiveschema.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="ValidSchema" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>validschema.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="V3ValidSchema" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>v3validschema.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="V4ValidSchema" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>v4validschema.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
 </root>

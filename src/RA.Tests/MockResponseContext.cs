@@ -16,10 +16,10 @@ namespace RA.Tests
         {
             var responseContent =
                 "{" +
-                    "'id':'3a6b4e0b-8e5c-df11-849b-0014c258f21e', " +
-                    "'products': [" +
-                        "{'id' : '2f355deb-423e-46aa-8d53-071b01018465'}, " +
-                        "{'id' : '065983e6-092a-491b-99b0-be3de3fe74c9', 'name' : 'wizzy bang'}" +
+                    "\"id\":\"3a6b4e0b-8e5c-df11-849b-0014c258f21e\", " +
+                    "\"products\": [" +
+                        "{\"id\" : \"2f355deb-423e-46aa-8d53-071b01018465\"}, " +
+                        "{\"id\" : \"065983e6-092a-491b-99b0-be3de3fe74c9\", \"name\" : \"wizzy bang\"}" +
                     "]" +
                 "}";
             _response = new ResponseContext(HttpStatusCode.OK, "application/json", "", -1, responseContent, new Dictionary<string, string>());
@@ -59,27 +59,34 @@ namespace RA.Tests
         }
 
         [Test]
-        public void TestValidSchema()
+        public void TestV3ValidSchema()
         {
             _response
-                .Schema(Resource.ValidSchema);
+                .Schema(Resource.V3ValidSchema);
         }
 
         [Test]
         [ExpectedException(typeof(ArgumentException))]
-        public void TestInvalidSchema()
+        public void TestV3InvalidSchema()
         {
             _response
-                .Schema(Resource.InvalidSchema);
+                .Schema(Resource.V3InvalidSchema);
         }
 
         [Test]
         [ExpectedException(typeof (AssertException))]
-        public void TestRestrictiveSchema()
+        public void TestV3RestrictiveSchema()
         {
             _response
-                .Schema(Resource.RestrictiveSchema)
+                .Schema(Resource.V3RestrictiveSchema)
                 .AssertSchema();
+        }
+
+        [Test]
+        public void TestV4ValidSchema()
+        {
+            _response
+                .Schema(Resource.V4ValidSchema);
         }
 
         [Test]

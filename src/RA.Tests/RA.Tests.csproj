@@ -64,9 +64,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Data\InvalidSchema.txt" />
-    <Content Include="Data\RestrictiveSchema.txt" />
-    <Content Include="Data\ValidSchema.txt" />
+    <Content Include="Data\V3InvalidSchema.txt" />
+    <Content Include="Data\V3RestrictiveSchema.txt" />
+    <Content Include="Data\V3ValidSchema.txt" />
+    <Content Include="Data\V4ValidSchema.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

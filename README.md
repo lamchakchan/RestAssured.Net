@@ -104,6 +104,10 @@ The call chains are structured around 4 main parts.
     .Test("string", Func<dynamic, bool>)
     //Assert your test.  Failed test will throw an AssertException
     .Assert("string")
+    //Apply a v3 or v4 json schema to the response.  Corrupted schemas will throw an ArgumentException
+    .Schema("string")
+    //Assert your schema against the response.  Failed test will throw an AssertException
+    .AssertSchema()
     //Assert all your test.  Failed test will throw an AssertException
     .AssertAll()
     //Output all of the test results
@@ -111,6 +115,14 @@ The call chains are structured around 4 main parts.
     //Debug the response
     .Debug()
 ```
+
+## JSON Schema Support
+ResAssured leverages Newtonsoft.Json for its JSON parsing and JSON schema validation support.  
+Newtonsoft.Json on supports draft 3 and draft 4 of the JSON scheam specification, so we can too!
+
+Utilize this tool to validate a draft 3 json schema
+[v3 Schema Validator](http://jsonschema.net/previous/)
+[v4 Schema Validator](http://jsonschema.net)
 
 ## More Examples
 
