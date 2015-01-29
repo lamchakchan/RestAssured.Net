@@ -28,6 +28,10 @@ namespace RA
                     return Get();
                 case HttpActionType.POST:
                     return Post();
+                case HttpActionType.PUT:
+                    return Put();
+                case HttpActionType.DELETE:
+                    return Delete();
                 default:
                     throw new Exception("should not have gotten here");
             }
@@ -58,6 +62,56 @@ namespace RA
         private ResponseContext Post()
         {
             var request = new RestRequest(_httpActionContext.Uri().PathAndQuery, Method.POST);
+
+            var headers = _setupContext.Headers();
+
+            if (headers.Any())
+                request.Parameters.RemoveAll(x => x.Type == ParameterType.HttpHeader);
+
+            foreach (var header in headers)
+            {
+                request.AddHeader(header.Key, header.Value);
+            }
+
+            foreach (var param in _setupContext.Params())
+            {
+                request.AddParameter(param.Key, param.Value, ParameterType.GetOrPost);
+            }
+
+            request.RequestFormat = DataFormat.Json;
+            request.AddParameter("text/json", _setupContext.Body(), ParameterType.RequestBody);
+
+            return BuildFromRestResponse(_restClient.Execute(request));
+        }
+
+        private ResponseContext Put()
+        {
+            var request = new RestRequest(_httpActionContext.Uri().PathAndQuery, Method.PUT);
+
+            var headers = _setupContext.Headers();
+
+            if (headers.Any())
+                request.Parameters.RemoveAll(x => x.Type == ParameterType.HttpHeader);
+
+            foreach (var header in headers)
+            {
+                request.AddHeader(header.Key, header.Value);
+            }
+
+            foreach (var param in _setupContext.Params())
+            {
+                request.AddParameter(param.Key, param.Value, ParameterType.GetOrPost);
+            }
+
+            request.RequestFormat = DataFormat.Json;
+            request.AddParameter("text/json", _setupContext.Body(), ParameterType.RequestBody);
+
+            return BuildFromRestResponse(_restClient.Execute(request));
+        }
+
+        private ResponseContext Delete()
+        {
+            var request = new RestRequest(_httpActionContext.Uri().PathAndQuery, Method.DELETE);
 
             var headers = _setupContext.Headers();
 

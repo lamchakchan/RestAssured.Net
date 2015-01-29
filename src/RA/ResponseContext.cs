@@ -54,13 +54,11 @@ namespace RA
 
         public ResponseContext Schema(string schema)
         {
-            //JsonSchema jsonSchema = null;
             JSchema jSchema = null;
 
             try
             {
                 jSchema = JSchema.Parse(schema);
-                //jsonSchema = JsonSchema.Parse(schema);
             }
             catch (Exception ex)
             {
