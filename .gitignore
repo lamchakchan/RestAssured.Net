@@ -30,6 +30,7 @@ ipch/
 obj/
 log4net/
 logging/
+packages/
 [Bb]in
 [Dd]ebug*/
 [Rr]elease*/
