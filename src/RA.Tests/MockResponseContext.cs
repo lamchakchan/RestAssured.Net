@@ -6,11 +6,11 @@ using RA.Exceptions;
 namespace RA.Tests
 {
     [TestFixture]
-    public class MockSuite
+    public class MockResponseContext
     {
         private ResponseContext _response;
 
-        public MockSuite()
+        public MockResponseContext()
         {
             var responseContent =
                 "{" +

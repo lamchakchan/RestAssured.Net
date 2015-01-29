@@ -29,7 +29,7 @@ namespace RA.Extensions
         public static void WriteTest(this KeyValuePair<string, bool> source)
         {
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write("{0} : ", source.Key);
+            Console.Write("- {0} : ", source.Key);
             Console.ResetColor();
 
             if (source.Value)
@@ -43,6 +43,20 @@ namespace RA.Extensions
                 Console.WriteLine("Failed");
             }
 
+            Console.ResetColor();
+        }
+
+        public static void WritePassedTest()
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("- Passed");
+            Console.ResetColor();
+        }
+
+        public static void WriteFailedTest()
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("- Failed");
             Console.ResetColor();
         }
     }

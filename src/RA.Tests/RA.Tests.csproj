@@ -40,9 +40,8 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MockSuite.cs" />
+    <Compile Include="MockResponseContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StorefrontSuite.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

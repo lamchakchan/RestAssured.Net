@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Schema;
 using RA.Exceptions;
 using RA.Extensions;
 
@@ -17,6 +18,8 @@ namespace RA
         private dynamic _parsedContent;
         private readonly Dictionary<string, string> _headers = new Dictionary<string, string>();
         private readonly Dictionary<string, bool>  _assertions = new Dictionary<string, bool>();
+        private bool _isSchemaValid = false;
+        private List<string> _schemaErrors = new List<string>(); 
         
         public ResponseContext(HttpStatusCode statusCode, string contentType, string contentEncoding, long contentLength, string content, Dictionary<string, string> headers)
         {
@@ -49,12 +52,48 @@ namespace RA
             return this;
         }
 
+        public ResponseContext Schema(string schema)
+        {
+            JsonSchema jsonSchema = null;
+
+            try
+            {
+                jsonSchema = JsonSchema.Parse(schema);
+            }
+            catch (Exception ex)
+            {
+                throw new ArgumentException("Schema is not valid", "schema", ex);
+            }
+
+            IList<string> messages;
+
+            _isSchemaValid = JObject.Parse(_content).IsValid(jsonSchema, out messages);
+
+            if (!_isSchemaValid)
+            {
+                foreach (var message in messages)
+                {
+                    _schemaErrors.Add(message);
+                }
+            }
+
+            return this;
+        }
+
         public void Assert(string ruleName)
         {
             if (_assertions.ContainsKey(ruleName))
             {
                 if(!_assertions[ruleName])
                     throw new AssertException(string.Format("({0}) Test Failed", ruleName));
+            }
+        }
+
+        public void AssertSchema()
+        {
+            if (!_isSchemaValid)
+            {
+                throw new AssertException(string.Format("Schema Check Failed"));
             }
         }
 
@@ -107,6 +146,12 @@ namespace RA
                 "{0} : {1}".WriteLine(assertion.Key, assertion.Value);
             }
 
+            "schema errors".WriteHeader();
+            foreach (var schemaError in _schemaErrors)
+            {
+                schemaError.WriteLine();
+            }
+
             return this;
         }
 
@@ -117,6 +162,10 @@ namespace RA
             {
                 assertion.WriteTest();
             }
+
+            "schema validation".WriteHeader();
+            if (_isSchemaValid) ConsoleExtensions.WritePassedTest();
+            else ConsoleExtensions.WriteFailedTest();
 
             return this;
         }
