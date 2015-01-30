@@ -1,8 +1,7 @@
 # RestAssured.Net
-A simple testing suite for REST based interfaces
+A simple testing suite for REST based interfaces.  The goal is to provide a tool that is simple to use and produces repeatable results.
 
 ## TODO
-- Add Load testing function.  Test for completion and average RTT.
 - Add hooks for testing against Http Meta such as content type, content size and so forth
 - Add features for processing Xml and possibly other formats.
 
