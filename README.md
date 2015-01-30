@@ -155,7 +155,7 @@ endpoint2.When().Post().Then().Test("test 1", x => x.id != null).Assert("test 1"
 ```C#
 new RestAssured()
     .Given()
-        .Name("JsonIP single thread")
+        .Name("JsonIP multi thread")
     .When()
         //Configure a load test with
         //6 threads that runs for 30 seconds

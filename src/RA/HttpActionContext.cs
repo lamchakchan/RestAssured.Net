@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using RA.Extensions;
 
 namespace RA
@@ -84,14 +85,29 @@ namespace RA
             return SetHttpAction(url, HttpActionType.POST);
         }
 
+        public ExecutionContext Post()
+        {
+            return SetHttpAction(null, HttpActionType.POST);
+        }
+
         public ExecutionContext Put(string url)
         {
             return SetHttpAction(url, HttpActionType.PUT);
         }
 
+        public ExecutionContext Put()
+        {
+            return SetHttpAction(null, HttpActionType.PUT);
+        }
+
         public ExecutionContext Delete(string url)
         {
             return SetHttpAction(url, HttpActionType.DELETE);
+        }
+
+        public ExecutionContext Delete()
+        {
+            return SetHttpAction(null, HttpActionType.DELETE);
         }
 
         public HttpActionContext Debug()
