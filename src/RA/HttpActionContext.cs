@@ -16,6 +16,9 @@ namespace RA
         private readonly SetupContext _setupContext;
         private string _url;
         private Uri _uri;
+        private bool _isLoadTest = false;
+        private int _threads = 1;
+        private int _seconds = 60;
         private HttpActionType _httpAction;
 
         public HttpActionContext(SetupContext setupContext)
@@ -36,6 +39,34 @@ namespace RA
         public Uri Uri()
         {
             return _uri;
+        }
+
+        public bool IsLoadTest()
+        {
+            return _isLoadTest;
+        }
+
+        public int Threads()
+        {
+            return _threads;
+        }
+
+        public int Seconds()
+        {
+            return _seconds;
+        }
+
+        public HttpActionContext Load(int threads = 1, int seconds = 60)
+        {
+            _isLoadTest = true;
+
+            if (threads < 0) threads = 1;
+            _threads = threads;
+
+            if (seconds < 0) seconds = 60;
+            _seconds = seconds;
+
+            return this;
         }
 
         public ExecutionContext Get(string url)

@@ -82,6 +82,8 @@ The call chains are structured around 4 main parts.
 ### When
 ```C#
   .When()
+    //Add a load test to the mix.  Set the # of threads and # of secs to run
+    .Load(int, int)
     //Use the GET verb with a url.  This will override the above section.
     .Get("string")
     //Use the Get verb without and rely on url settings from Given() section
@@ -148,3 +150,18 @@ endpoint1.When().Get().Then().Test("test 1", x => x.id != null).Assert("test 1")
 endpoint2.When().Post().Then().Test("test 1", x => x.id != null).Assert("test 1");
 ```
 
+### Load Test
+```C#
+new RestAssured()
+    .Given()
+        .Name("JsonIP single thread")
+    .When()
+        //Configure a load test with
+        //6 threads that runs for 30 seconds
+        .Load(6, 30)
+        //Using this address
+        .Get("http://yourremote.com")
+    .Then()
+        //Print out the results
+        .Debug();
+```

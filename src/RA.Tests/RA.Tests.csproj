@@ -46,6 +46,7 @@
       <DependentUpon>Resource.resx</DependentUpon>
     </Compile>
     <Compile Include="JsonIpIntegration.cs" />
+    <Compile Include="LoadIntegrationTest.cs" />
     <Compile Include="MockResponseContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -10,12 +10,12 @@ namespace RA.Tests
         {
             new RestAssured()
                 .Given()
-                .Name("JsonIP")
+                    .Name("JsonIP")
                 .When()
-                .Get("http://www.telize.com/jsonip")
+                    .Get("http://www.telize.com/jsonip")
                 .Then()
-                .Test("ip exist", x => x.ip != null)
-                .Assert("ip exist");
+                    .Test("ip exist", x => x.ip != null)
+                    .Assert("ip exist");
         }
     }
 }

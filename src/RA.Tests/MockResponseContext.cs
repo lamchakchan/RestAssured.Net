@@ -22,7 +22,7 @@ namespace RA.Tests
                         "{\"id\" : \"065983e6-092a-491b-99b0-be3de3fe74c9\", \"name\" : \"wizzy bang\"}" +
                     "]" +
                 "}";
-            _response = new ResponseContext(HttpStatusCode.OK, "application/json", "", -1, responseContent, new Dictionary<string, string>());
+            _response = new ResponseContext(HttpStatusCode.OK, "application/json", "", -1, responseContent, new Dictionary<string, string>(), null);
         }
 
         [Test]

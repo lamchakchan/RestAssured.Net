@@ -1,15 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Reflection.Emit;
+using System.Security.Cryptography.X509Certificates;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 using RA.Exceptions;
 using RA.Extensions;
+using RestSharp;
 
 namespace RA
 {
     public class ResponseContext
     {
+        private readonly RestClient _restClient;
+        private readonly RestRequest _restRequest;
         private readonly HttpStatusCode _statusCode;
         private readonly long _contentLength;
         private readonly string _content;
@@ -18,10 +24,11 @@ namespace RA
         private dynamic _parsedContent;
         private readonly Dictionary<string, string> _headers = new Dictionary<string, string>();
         private readonly Dictionary<string, bool>  _assertions = new Dictionary<string, bool>();
+        private readonly List<LoadResponse> _loadResponses;
         private bool _isSchemaValid = false;
-        private List<string> _schemaErrors = new List<string>(); 
-        
-        public ResponseContext(HttpStatusCode statusCode, string contentType, string contentEncoding, long contentLength, string content, Dictionary<string, string> headers)
+        private List<string> _schemaErrors = new List<string>();
+
+        public ResponseContext(HttpStatusCode statusCode, string contentType, string contentEncoding, long contentLength, string content, Dictionary<string, string> headers, List<LoadResponse> loadResponses) 
         {
             _statusCode = statusCode;
             _contentType = contentType;
@@ -29,6 +36,7 @@ namespace RA
             _contentLength = contentLength;
             _content = content;
             _headers = headers;
+            _loadResponses = loadResponses ?? new List<LoadResponse>();
 
             Parse();
         }
@@ -151,6 +159,14 @@ namespace RA
             {
                 schemaError.WriteLine();
             }
+
+            "load test result".WriteHeader();
+            "{0} total call".WriteLine(_loadResponses.Count);
+            "{0} total succeeded".WriteLine(_loadResponses.Count(x => x.StatusCode == (int)HttpStatusCode.OK));
+            "{0} total lost".WriteLine(_loadResponses.Count(x => x.StatusCode == -1));
+            "{0} average ttl ms".WriteLine(new TimeSpan((long)_loadResponses.Where(x => x.StatusCode == (int)HttpStatusCode.OK).Average(x => x.Ticks)).TotalMilliseconds);
+            "{0} max ttl ms".WriteLine(new TimeSpan(_loadResponses.Where(x => x.StatusCode == (int)HttpStatusCode.OK).Max(x => x.Ticks)).TotalMilliseconds);
+            "{0} min ttl ms".WriteLine(new TimeSpan(_loadResponses.Where(x => x.StatusCode == (int)HttpStatusCode.OK).Min(x => x.Ticks)).TotalMilliseconds);
 
             return this;
         }
