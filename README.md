@@ -120,9 +120,11 @@ The call chains are structured around 4 main parts.
 ResAssured leverages Newtonsoft.Json for its JSON parsing and JSON schema validation support.  
 Newtonsoft.Json on supports draft 3 and draft 4 of the JSON scheam specification, so we can too!
 
-Utilize this tool to validate a draft 3 json schema
+Utilize these tools to validate your JSON schema
+
 [v3 Schema Validator](http://jsonschema.net/previous/)
-[v4 Schema Validator](http://jsonschema.net)
+
+[v4 Schema Validator](http://json-schema-validator.herokuapp.com/)
 
 ## More Examples
 
