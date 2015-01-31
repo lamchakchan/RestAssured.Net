@@ -34,7 +34,7 @@ new RestAssured()
   .Then()
     //Give the name of the test and a lambda expression to test with
     //The lambda expression keys off of 'x' which represents the json blob as a dynamic.
-    .Test("test a", x => x.about != null)
+    .TestBody("test a", x => x.about != null)
     //Throw an AssertException if the test case is false.
     .Assert("test a");
 ```
@@ -174,10 +174,10 @@ var endpoint1 = new RestAssured()
 var endpoint2 = endpoint1.Clone().Uri("/endpoint2");
 
 //Do a GET action with the first endpoint configuration
-endpoint1.When().Get().Then().Test("test 1", x => x.id != null).Assert("test 1");
+endpoint1.When().Get().Then().TestBody("test 1", x => x.id != null).Assert("test 1");
 
 //Do a POSt action with the second endpoint configuration
-endpoint2.When().Post().Then().Test("test 1", x => x.id != null).Assert("test 1");
+endpoint2.When().Post().Then().TestBody("test 1", x => x.id != null).Assert("test 1");
 ```
 
 ### Load Test
