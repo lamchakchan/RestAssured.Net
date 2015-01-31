@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="RA.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Headspring\LICENSE.txt" />
