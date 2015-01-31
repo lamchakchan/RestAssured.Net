@@ -47,7 +47,7 @@
     </Compile>
     <Compile Include="JsonIpIntegration.cs" />
     <Compile Include="LoadIntegrationTest.cs" />
-    <Compile Include="MockResponseContext.cs" />
+    <Compile Include="MockResponseContextWithJson.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

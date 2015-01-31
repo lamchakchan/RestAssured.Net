@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 using RA.Enums;
 using RA.Extensions;
 
@@ -27,50 +28,96 @@ namespace RA
             return !string.IsNullOrEmpty(value) ? value.Split(new[] { ',' }).Select(x => x.Trim()).ToList() : new List<string>();
         };
 
+        /// <summary>
+        /// Setup the name of the test suite.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public SetupContext Name(string name)
         {
             _name = name;
             return this;
         }
 
+        /// <summary>
+        /// Returns the name of the test suite.
+        /// </summary>
+        /// <returns></returns>
         public string Name()
         {
             return _name;
         }
 
+        /// <summary>
+        /// Setup the host value to use.
+        /// eg: http://www.consoco.com
+        /// </summary>
+        /// <param name="host"></param>
+        /// <returns></returns>
         public SetupContext Host(string host)
         {
             _host = host;
             return this;
         }
 
+        /// <summary>
+        /// Returns the host value.
+        /// </summary>
+        /// <returns></returns>
         public string Host()
         {
             return _host;
         }
 
+        /// <summary>
+        /// Setup the Uri, this is usually every after the host name.
+        /// eg: /resource/identifer/path?query=value1
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
         public SetupContext Uri(string uri)
         {
             _uri = uri;
             return this;
         }
 
+        /// <summary>
+        /// Returns the Uri.
+        /// </summary>
+        /// <returns></returns>
         public string Uri()
         {
             return _uri;
         }
 
+        /// <summary>
+        /// Set a body of content to be used with a POST/PUT/DELETE action.
+        /// This is usually a blob of JSON or XML.  The body will not be used if Params exist.
+        /// </summary>
+        /// <param name="body"></param>
+        /// <returns></returns>
         public SetupContext Body(string body)
         {
             _body = body;
             return this;
         }
 
+        /// <summary>
+        /// Return the body of content.
+        /// </summary>
+        /// <returns></returns>
         public string Body()
         {
             return _body;
         }
 
+        /// <summary>
+        /// Set a Http request header value pair.
+        /// eg: key : content-type and value : application/json
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public SetupContext Header(string key, string value)
         {
             if (!_headers.ContainsKey(key))
@@ -78,31 +125,55 @@ namespace RA
             return this;
         }
 
+        /// <summary>
+        /// Return all headers.
+        /// </summary>
+        /// <returns></returns>
         public Dictionary<string, string> Headers()
         {
             return _headers.Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToDictionary(x => x.Key, x => x.Value);
         }
 
+        /// <summary>
+        /// Return the value for a content-type header.
+        /// </summary>
+        /// <returns></returns>
         public List<string> HeaderContentType()
         {
             return GetHeaderFor(HeaderType.ContentType.Value, _headers);
         }
 
+        /// <summary>
+        /// Return the value for an accept header.
+        /// </summary>
+        /// <returns></returns>
         public List<string> HeaderAccept()
         {
             return GetHeaderFor(HeaderType.Accept.Value, _headers);
         }
 
+        /// <summary>
+        /// Return the value for an accept-encoding header.
+        /// </summary>
+        /// <returns></returns>
         public List<string> HeaderAcceptEncoding()
         {
             return GetHeaderFor(HeaderType.AcceptEncoding.Value, _headers);
         }
 
+        /// <summary>
+        /// Return the value for an accept-charset header.
+        /// </summary>
+        /// <returns></returns>
         public List<string> HeaderAcceptCharset()
         {
             return GetHeaderFor(HeaderType.AcceptCharset.Value, _headers);
         }
 
+        /// <summary>
+        /// Return all headers except for content-type, accept, accept-encoding and accept-charset
+        /// </summary>
+        /// <returns></returns>
         public Dictionary<string, string> HeaderForEverythingElse()
         {
             return
@@ -113,6 +184,13 @@ namespace RA
                     .ToDictionary(x => x.Key, x => x.Value);
         }
 
+        /// <summary>
+        /// Set a Form value pair.  This is any key/value pair that needs to be formatted into the body of the request
+        /// for POST/PUT/DELETE actions.  Using this will negate the usage of Body()
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public SetupContext Param(string key, string value)
         {
             if (!_parameters.ContainsKey(key))
@@ -120,11 +198,21 @@ namespace RA
             return this;
         }
 
+        /// <summary>
+        /// Return form value pairs.
+        /// </summary>
+        /// <returns></returns>
         public Dictionary<string, string> Params()
         {
             return _parameters.Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToDictionary(x => x.Key, x => x.Value);
         }
 
+        /// <summary>
+        /// Set a Querystring value pair.  This is any key/value pair that needs to go into the Url.  This will be emitted with all Http verbs.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public SetupContext Query(string key, string value)
         {
             if (!_queryStrings.ContainsKey(key))
@@ -132,6 +220,10 @@ namespace RA
             return this;
         }
 
+        /// <summary>
+        /// Return Querystring value pairs.
+        /// </summary>
+        /// <returns></returns>
         public Dictionary<string, string> Queries()
         {
             return _queryStrings.Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToDictionary(x => x.Key, x => x.Value);
@@ -142,16 +234,26 @@ namespace RA
             return new HttpActionContext(this);
         }
 
+        /// <summary>
+        /// Deep copy of this object
+        /// </summary>
+        /// <returns></returns>
         public SetupContext Clone()
         {
             var setupContext = new SetupContext()
                 .Name(_name)
                 .Host(_host)
-                .Uri(_uri);
+                .Uri(_uri)
+                .Body(_body);
 
             foreach (var header in _headers)
             {
                 setupContext.Header(header.Key, header.Value);
+            }
+
+            foreach (var query in _queryStrings)
+            {
+                setupContext.Query(query.Key, query.Value);
             }
 
             foreach (var parameter in _parameters)
@@ -162,6 +264,10 @@ namespace RA
             return setupContext;
         }
 
+        /// <summary>
+        /// Output all debug values from the setup context.
+        /// </summary>
+        /// <returns></returns>
         public SetupContext Debug()
         {
             "name".WriteHeader();

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
+using RA.Enums;
 using RA.Exceptions;
 using RA.Extensions;
 
@@ -12,42 +13,86 @@ namespace RA
     public class ResponseContext
     {
         private readonly HttpStatusCode _statusCode;
-        private readonly long _contentLength;
         private readonly string _content;
-        private readonly string _contentType;
-        private readonly string _contentEncoding;
         private dynamic _parsedContent;
         private readonly Dictionary<string, IEnumerable<string>> _headers = new Dictionary<string, IEnumerable<string>>();
+        private readonly Dictionary<string, double> _loadValues = new Dictionary<string, double>(); 
         private readonly Dictionary<string, bool>  _assertions = new Dictionary<string, bool>();
         private readonly List<LoadResponse> _loadResponses;
         private bool _isSchemaValid = false;
         private List<string> _schemaErrors = new List<string>();
 
-        public ResponseContext(HttpStatusCode statusCode, string contentType, string contentEncoding, long contentLength, string content, Dictionary<string, IEnumerable<string>> headers, List<LoadResponse> loadResponses) 
+        public ResponseContext(HttpStatusCode statusCode, string content, Dictionary<string, IEnumerable<string>> headers, List<LoadResponse> loadResponses) 
         {
             _statusCode = statusCode;
-            _contentType = contentType;
-            _contentEncoding = contentEncoding;
-            _contentLength = contentLength;
             _content = content;
             _headers = headers;
             _loadResponses = loadResponses ?? new List<LoadResponse>();
 
-            Parse();
+            Initialize();
         }
 
-        public ResponseContext Test(string ruleName, Func<dynamic, bool> predicate)
+        /// <summary>
+        /// Setup a test against the body of response document.
+        /// </summary>
+        /// <param name="ruleName"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public ResponseContext TestBody(string ruleName, Func<dynamic, bool> func)
         {
-            if(_assertions.ContainsKey(ruleName))
-                throw new ArgumentException(string.Format("({0}) already exist", ruleName));
+            return TestWrapper(ruleName, () => func.Invoke(_parsedContent));
+        }
+
+        /// <summary>
+        /// Setup a test against the response headers.
+        /// </summary>
+        /// <param name="ruleName"></param>
+        /// <param name="key"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public ResponseContext TestHeader(string ruleName, string key, Func<string, bool> func)
+        {
+            return TestWrapper(ruleName, () => func.Invoke(HeaderValue(key.Trim())));
+        }
+
+        /// <summary>
+        /// Setup a test against the calculated load test values.  The entire set of
+        /// load test values are only available if a load test was configured with the
+        /// When().Load() call.
+        /// </summary>
+        /// <param name="ruleName"></param>
+        /// <param name="key"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public ResponseContext TestLoad(string ruleName, string key, Func<double, bool> func)
+        {
+            return TestWrapper(ruleName, () => func.Invoke(LoadValue(key.Trim())));
+        }
+
+        /// <summary>
+        /// Setup a test against the response status
+        /// eg: OK 200 or Error 400
+        /// </summary>
+        /// <param name="ruleName"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public ResponseContext TestStatus(string ruleName, Func<int, bool> func)
+        {
+            return TestWrapper(ruleName, () => func.Invoke((int) _statusCode));
+        }
+
+        private ResponseContext TestWrapper(string ruleName, Func<bool> func)
+        {
+            if (_assertions.ContainsKey(ruleName))
+                throw new ArgumentException(string.Format("Rule for ({0}) already exist", ruleName));
 
             var result = false;
 
             try
             {
-                result = predicate.Invoke(_parsedContent);
+                result = func.Invoke();
             }
-            catch (Exception ex) 
+            catch
             { }
 
             _assertions.Add(ruleName, result);
@@ -55,6 +100,12 @@ namespace RA
             return this;
         }
 
+        /// <summary>
+        /// Setup a schema to validate the response body structure with.
+        /// For JSON, v3 and v4 of the JSON schema draft specificiation are respected.
+        /// </summary>
+        /// <param name="schema"></param>
+        /// <returns></returns>
         public ResponseContext Schema(string schema)
         {
             JSchema jSchema = null;
@@ -92,6 +143,9 @@ namespace RA
             }
         }
 
+        /// <summary>
+        /// Assert schema for validity.  Failures will produce an AssertException.
+        /// </summary>
         public void AssertSchema()
         {
             if (!_isSchemaValid)
@@ -100,6 +154,9 @@ namespace RA
             }
         }
 
+        /// <summary>
+        /// Assert all test and schema for validity.  Failures will produce an AssertException.
+        /// </summary>
         public void AssertAll()
         {
             foreach (var assertion in _assertions)
@@ -107,37 +164,76 @@ namespace RA
                 if(!assertion.Value)
                     throw new AssertException(string.Format("({0}) Test Failed", assertion.Key));
             }
+
+            AssertSchema();
+        }
+
+        private void Initialize()
+        {
+            Parse();
+            ParseLoad();
         }
 
         private void Parse()
         {
-            if (_contentType.Contains("json"))
+            var contentType = ContentType();
+
+            if (contentType.Contains("json"))
             {
                 _parsedContent = JObject.Parse(_content);
                 return;
             }
 
-            throw new Exception(string.Format("({0}) not supported", _contentType));
+            throw new Exception(string.Format("({0}) not supported", contentType));
         }
 
+        private void ParseLoad()
+        {
+            if (_loadResponses.Any())
+            {
+                _loadValues.Add(LoadValueTypes.TotalCall.Value, _loadResponses.Count);
+                _loadValues.Add(LoadValueTypes.TotalSucceeded.Value, _loadResponses.Count(x => x.StatusCode == (int)HttpStatusCode.OK));
+                _loadValues.Add(LoadValueTypes.TotalLost.Value, _loadResponses.Count(x => x.StatusCode == -1));
+                _loadValues.Add(LoadValueTypes.AverageTTLMs.Value, new TimeSpan((long)_loadResponses.Where(x => x.StatusCode == (int)HttpStatusCode.OK).Average(x => x.Ticks)).TotalMilliseconds);
+                _loadValues.Add(LoadValueTypes.MaximumTTLMs.Value, new TimeSpan(_loadResponses.Where(x => x.StatusCode == (int)HttpStatusCode.OK).Max(x => x.Ticks)).TotalMilliseconds);
+                _loadValues.Add(LoadValueTypes.MinimumTTLMs.Value, new TimeSpan(_loadResponses.Where(x => x.StatusCode == (int)HttpStatusCode.OK).Min(x => x.Ticks)).TotalMilliseconds);
+            }
+        }
+
+        private string ContentType()
+        {
+            return HeaderValue(HeaderType.ContentType.Value);
+        }
+
+        private string HeaderValue(string key)
+        {
+            return _headers.Where(x => x.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
+                    .Select(x => string.Join(", ", x.Value))
+                    .DefaultIfEmpty(string.Empty)
+                    .FirstOrDefault(); 
+        }
+
+        private double LoadValue(string key)
+        {
+            return _loadValues.Where(x => x.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
+                    .Select(x => x.Value)
+                    .DefaultIfEmpty(0)
+                    .FirstOrDefault(); 
+        }
+
+        /// <summary>
+        /// Output all debug values from the setup context.
+        /// </summary>
+        /// <returns></returns>
         public ResponseContext Debug()
         {
             "status code".WriteHeader();
             ((int)_statusCode).ToString().WriteLine();
 
-            "content type".WriteHeader();
-            _contentType.WriteLine();
-
-            "content length".WriteHeader();
-            _contentLength.ToString().WriteLine();
-
-            "content encoding".WriteHeader();
-            _contentEncoding.WriteLine();
-
             "response headers".WriteHeader();
             foreach (var header in _headers)
             {
-                "{0} : {1}".WriteLine(header.Key, header.Value);
+                "{0} : {1}".WriteLine(header.Key, string.Join(", ", header.Value));
             }
 
             "content".WriteHeader();
@@ -155,17 +251,19 @@ namespace RA
                 schemaError.WriteLine();
             }
 
-            "load test result".WriteHeader();
-            "{0} total call".WriteLine(_loadResponses.Count);
-            "{0} total succeeded".WriteLine(_loadResponses.Count(x => x.StatusCode == (int)HttpStatusCode.OK));
-            "{0} total lost".WriteLine(_loadResponses.Count(x => x.StatusCode == -1));
-            "{0} average ttl ms".WriteLine(new TimeSpan((long)_loadResponses.Where(x => x.StatusCode == (int)HttpStatusCode.OK).Average(x => x.Ticks)).TotalMilliseconds);
-            "{0} max ttl ms".WriteLine(new TimeSpan(_loadResponses.Where(x => x.StatusCode == (int)HttpStatusCode.OK).Max(x => x.Ticks)).TotalMilliseconds);
-            "{0} min ttl ms".WriteLine(new TimeSpan(_loadResponses.Where(x => x.StatusCode == (int)HttpStatusCode.OK).Min(x => x.Ticks)).TotalMilliseconds);
+            if (_loadResponses.Any())
+            {
+                "load test result".WriteHeader();
+                LoadValueTypes.GetAll().ForEach(x => "{0} {1}".WriteLine(_loadValues[x.Value], x.DisplayName.ToLower()));
+            }
 
             return this;
         }
 
+        /// <summary>
+        /// Write the response of all asserted test via Console.IO
+        /// </summary>
+        /// <returns></returns>
         public ResponseContext WriteAssertions()
         {
             "assertions".WriteHeader();

@@ -82,12 +82,20 @@ The call chains are structured around 4 main parts.
     .Load(int, int)
     //Use the GET verb with a url.  This will override the above section.
     .Get("string")
-    //Use the Get verb without and rely on url settings from Given() section
+    //Use the GET verb without and rely on url settings from Given() section
     .Get()
-    //Use the POSt verb with a url.  This will override the above section.
+    //Use the POST verb with a url.  This will override the above section.
     .Post("string")
-    //Use the Post verb without and rely on the url settings from Given() section.
+    //Use the POST verb without and rely on the url settings from Given() section.
     .Post()
+    //Use the PUT verb with a url.  This will override the above section.
+    .Put("string")
+    //Use the PUT verb without and rely on the url settings from Given() section.
+    .Put()
+    //Use the DELETE verb with a url.  This will override the above section.
+    .Delete("string")
+    //Use the DELETE verb without and rely on the url settings from Given() section.
+    .Delete()
     //Debug the settings
     .Debug()
 ```
@@ -95,9 +103,19 @@ The call chains are structured around 4 main parts.
 ### Then
 ```C#
   .Then()
-    //Write a test to make an assertion with
+    //Write a test to make an assertion against the response body
+    //The response body is the json blob that is returned from a REST call
     //eg: "test A", x => x.id != null
-    .Test("string", Func<dynamic, bool>)
+    .TestBody("string", Func<dynamic, bool>)
+    //Write a test to make an assertion against the response header
+    //eg: "test B", "content-type", x => x.Contains("json")
+    .TestHeader("string", "string", Func<string, bool>)
+    //Write a test to make an assertion against load test results
+    //eg: "test C", "average-ttl-ms", x => x < 1000 && x > 0
+    .TestLoad("string", "string", Func<double, bool>)
+    //Write a test to make an assertion against the response status code
+    //eg: "test D", x => x == 200
+    .TestStatus("string", Func<int, bool>)
     //Assert your test.  Failed test will throw an AssertException
     .Assert("string")
     //Apply a v3 or v4 json schema to the response.  Corrupted schemas will throw an ArgumentException
@@ -111,6 +129,20 @@ The call chains are structured around 4 main parts.
     //Debug the response
     .Debug()
 ```
+
+##Reference
+
+###Keys for TestLoad() Command
+There are predefined keys for this test.
+```
+total-call
+total-succeeded
+total-lost
+average-ttl-ms
+maximum-ttl-ms
+minimum-ttl-ms
+```
+
 
 ## JSON Schema Support
 ResAssured leverages Newtonsoft.Json for its JSON parsing and JSON schema validation support.  
@@ -160,6 +192,9 @@ new RestAssured()
         //Using this address
         .Get("http://yourremote.com")
     .Then()
-        //Print out the results
-        .Debug();
+        //Assert Load Test and Print Results
+        .Debug
+        .TestLoad("good-average", "average-ttl-ms", x => x > 100 && x < 400)
+        .Assert("good-average");
+        
 ```

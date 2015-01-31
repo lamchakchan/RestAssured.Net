@@ -56,6 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Enums\HeaderType.cs" />
+    <Compile Include="Enums\LoadValueTypes.cs" />
     <Compile Include="Exceptions\AssertException.cs" />
     <Compile Include="ExecutionContext.cs" />
     <Compile Include="Extensions\ConsoleExtensions.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="Headspring\Enumeration.cs" />
     <Compile Include="HttpActionContext.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="LoadResponse.cs" />
     <Compile Include="ResponseContext.cs" />
     <Compile Include="SetupContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -8,7 +8,7 @@
     <owners>Lam Chan</owners>
     <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
     <projectUrl>https://github.com/lamchakchan/RestAssured.Net</projectUrl>
-    <iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>
+    <iconUrl>https://github.com/lamchakchan/RestAssured.Net</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Easy to use REST interface tester</description>
     <releaseNotes>.</releaseNotes>

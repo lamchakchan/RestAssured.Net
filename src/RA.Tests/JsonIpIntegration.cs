@@ -14,7 +14,8 @@ namespace RA.Tests
                 .When()
                     .Get("http://www.telize.com/jsonip")
                 .Then()
-                    .Test("ip exist", x => x.ip != null)
+                    .Debug()
+                    .TestBody("ip exist", x => x.ip != null)
                     .Assert("ip exist");
         }
     }

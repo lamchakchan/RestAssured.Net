@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using RA.Extensions;
 
 namespace RA
@@ -16,7 +15,6 @@ namespace RA
     {
         private readonly SetupContext _setupContext;
         private string _url;
-        private Uri _uri;
         private bool _isLoadTest = false;
         private int _threads = 1;
         private int _seconds = 60;
@@ -27,36 +25,58 @@ namespace RA
             _setupContext = setupContext;
         }
 
+        /// <summary>
+        /// Return the Http Verb that will be used for the test.
+        /// </summary>
+        /// <returns></returns>
         public HttpActionType HttpAction()
         {
             return _httpAction;
         }
 
+        /// <summary>
+        /// Return the Url
+        /// </summary>
+        /// <returns></returns>
         public string Url()
         {
             return _url;
         }
 
-        public Uri Uri()
-        {
-            return _uri;
-        }
-
+        /// <summary>
+        /// Return value indicating setup for load test.
+        /// </summary>
+        /// <returns></returns>
         public bool IsLoadTest()
         {
             return _isLoadTest;
         }
 
+        /// <summary>
+        /// Return thread count used in load test.
+        /// </summary>
+        /// <returns></returns>
         public int Threads()
         {
             return _threads;
         }
 
+        /// <summary>
+        /// Return seconds to use for load test.
+        /// </summary>
+        /// <returns></returns>
         public int Seconds()
         {
             return _seconds;
         }
 
+        /// <summary>
+        /// Configure load test with the number of threads and amount of time in seconds to run the test with.
+        /// Default of 1 thread and 60 seconds are used if no values are specified.
+        /// </summary>
+        /// <param name="threads"></param>
+        /// <param name="seconds"></param>
+        /// <returns></returns>
         public HttpActionContext Load(int threads = 1, int seconds = 60)
         {
             _isLoadTest = true;
@@ -70,46 +90,50 @@ namespace RA
             return this;
         }
 
-        public ExecutionContext Get(string url)
+        /// <summary>
+        /// Configure test with a GET verb.  The url parameter is optional if similar info was provided through the setup context.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public ExecutionContext Get(string url = null)
         {
             return SetHttpAction(url, HttpActionType.GET);
         }
 
-        public ExecutionContext Get()
-        {
-            return SetHttpAction(null, HttpActionType.GET);
-        }
-
-        public ExecutionContext Post(string url)
+        /// <summary>
+        /// Configure test with a POST verb.  The url parameter is optional if similar info was provided through the setup context.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public ExecutionContext Post(string url = null)
         {
             return SetHttpAction(url, HttpActionType.POST);
         }
 
-        public ExecutionContext Post()
-        {
-            return SetHttpAction(null, HttpActionType.POST);
-        }
-
-        public ExecutionContext Put(string url)
+        /// <summary>
+        /// Configure test with a PUT verb.  The url parameter is optional if similar info was provided through the setup context.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public ExecutionContext Put(string url = null)
         {
             return SetHttpAction(url, HttpActionType.PUT);
         }
 
-        public ExecutionContext Put()
-        {
-            return SetHttpAction(null, HttpActionType.PUT);
-        }
-
-        public ExecutionContext Delete(string url)
+        /// <summary>
+        /// Configure test with a DELETE verb.  The url parameter is optional if similar info was provided through the setup context.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public ExecutionContext Delete(string url = null)
         {
             return SetHttpAction(url, HttpActionType.DELETE);
         }
 
-        public ExecutionContext Delete()
-        {
-            return SetHttpAction(null, HttpActionType.DELETE);
-        }
-
+        /// <summary>
+        /// Output all debug values from the setup context.
+        /// </summary>
+        /// <returns></returns>
         public HttpActionContext Debug()
         {
             "url".WriteLine();
@@ -138,7 +162,6 @@ namespace RA
                 : new Uri(new Uri(_setupContext.Host().FixProtocol()), _setupContext.Uri());
 
             _url = uri.OriginalString;
-            _uri = uri;
         }
     }
 }

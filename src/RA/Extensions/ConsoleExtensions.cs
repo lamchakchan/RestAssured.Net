@@ -39,20 +39,20 @@ namespace RA.Extensions
 
         public static void WriteTest(this KeyValuePair<string, bool> source)
         {
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write("- {0} : ", source.Key);
-            Console.ResetColor();
-
             if (source.Value)
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Passed");
+                WritePassedTest();
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Failed");
+                WriteFailedTest();
             }
+
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine(" : {0}", source.Key);
+            Console.ResetColor();
+
+            
 
             Console.ResetColor();
         }

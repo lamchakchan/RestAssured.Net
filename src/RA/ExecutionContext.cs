@@ -15,17 +15,6 @@ using RA.Extensions;
 
 namespace RA
 {
-    public class LoadResponse
-    {
-        public LoadResponse(int statusCode, long ticks)
-        {
-            Ticks = ticks;
-            StatusCode = statusCode;
-        }
-        public long Ticks { get; set; }
-        public int StatusCode { get; set; }
-    }
-
     public class ExecutionContext
     {
         private readonly SetupContext _setupContext;
@@ -224,32 +213,35 @@ namespace RA
 
             return new ResponseContext(
                 response.StatusCode,
-                response.Content.Headers.ContentType.MediaType,
-                response.Content.Headers.ContentEncoding.FirstOrDefault(),
-                response.Content.Headers.ContentLength.Value,
                 content,
-                response.Content.Headers.ToDictionary(x => x.Key, x => x.Value),
+                response.Content.Headers.ToDictionary(x => x.Key.Trim(), x => x.Value),
                 _loadReponses.ToList()
                 );
 
         }
 
+        /// <summary>
+        /// Output all debug values from the setup context.
+        /// </summary>
+        /// <returns></returns>
         public ExecutionContext Debug()
         {
+            var uri = BuildUri();
+
             "host".WriteHeader();
-            _httpActionContext.Uri().Host.WriteLine();
+            uri.Host.WriteLine();
             "absolute path".WriteHeader();
-            _httpActionContext.Uri().AbsolutePath.WriteLine();
+            uri.AbsolutePath.WriteLine();
             "absolute uri".WriteHeader();
-            _httpActionContext.Uri().AbsoluteUri.WriteLine();
+            uri.AbsoluteUri.WriteLine();
             "authority".WriteHeader();
-            _httpActionContext.Uri().Authority.WriteLine();
+            uri.Authority.WriteLine();
             "path and query".WriteHeader();
-            _httpActionContext.Uri().PathAndQuery.WriteLine();
+            uri.PathAndQuery.WriteLine();
             "original string".WriteHeader();
-            _httpActionContext.Uri().OriginalString.WriteLine();
+            uri.OriginalString.WriteLine();
             "scheme".WriteHeader();
-            _httpActionContext.Uri().Scheme.WriteLine();
+            uri.Scheme.WriteLine();
 
             return this;
         }
