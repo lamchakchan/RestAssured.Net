@@ -110,7 +110,7 @@ The call chains are structured around 4 main parts.
     //Write a test to make an assertion against the response header
     //eg: "test B", "content-type", x => x.Contains("json")
     .TestHeader("string", "string", Func<string, bool>)
-    //Write a test to make an assertion against load test results
+    //Write a test to make an assertion against load test results.  Refer to the Reference section below for complete list of keys.
     //eg: "test C", "average-ttl-ms", x => x < 1000 && x > 0
     .TestLoad("string", "string", Func<double, bool>)
     //Write a test to make an assertion against the response status code
@@ -133,7 +133,7 @@ The call chains are structured around 4 main parts.
 ##Reference
 
 ###Keys for TestLoad() Command
-There are predefined keys for this test.
+There are predefined keys for these test.
 ```
 total-call
 total-succeeded
