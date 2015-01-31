@@ -13,7 +13,7 @@ namespace RA.Tests
                     .Name("JsonIP single thread")
                 .When()
                 //one thread for 15 seconds
-                    .Load(1, 30)
+                    .Load(1, 10)
                     .Get("http://www.telize.com/jsonip")
                 .Then()
                     .Debug();
@@ -27,7 +27,7 @@ namespace RA.Tests
                     .Name("JsonIP single thread")
                 .When()
                 //one thread for 15 seconds
-                    .Load(6, 30)
+                    .Load(6, 10)
                     .Get("http://www.telize.com/jsonip")
                 .Then()
                     .Debug();

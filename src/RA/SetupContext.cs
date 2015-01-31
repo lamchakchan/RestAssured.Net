@@ -14,6 +14,7 @@ namespace RA
         private string _body;
         private Dictionary<string, string> _headers = new Dictionary<string, string>();
         private Dictionary<string, string> _parameters = new Dictionary<string, string>();
+        private Dictionary<string, string> _queryStrings = new Dictionary<string, string>(); 
 
         private Func<string, IDictionary<string, string>, List<string>> GetHeaderFor = (filter, headers) =>
         {
@@ -124,6 +125,18 @@ namespace RA
             return _parameters.Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToDictionary(x => x.Key, x => x.Value);
         }
 
+        public SetupContext Query(string key, string value)
+        {
+            if (!_queryStrings.ContainsKey(key))
+                _queryStrings.Add(key, value);
+            return this;
+        }
+
+        public Dictionary<string, string> Queries()
+        {
+            return _queryStrings.Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToDictionary(x => x.Key, x => x.Value);
+        }
+
         public HttpActionContext When()
         {
             return new HttpActionContext(this);
@@ -167,6 +180,12 @@ namespace RA
             foreach (var header in _headers)
             {
                 "{0} : {1}".WriteLine(header.Key, header.Value);
+            }
+
+            "querystrings".WriteHeader();
+            foreach (var queryString in _queryStrings)
+            {
+                "{0} : {1}".WriteLine(queryString.Key, queryString.Value);
             }
 
             "parameters".WriteHeader();

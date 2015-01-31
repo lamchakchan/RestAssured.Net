@@ -60,10 +60,11 @@ The call chains are structured around 4 main parts.
     //Set up Http Header
     //eg: "Accept-Encoding", "gzip, deflate"
     .Header("string", "string")
-    //Set up Parameters
-    //There is magic that will automatically create querystrings or header values calculated from the Http verb
+    //Add query string parameters for any HTTP verb
+    .Query("string", "string")
+    //Add parameters for the body of the request if it is POST, PUT or DELETE
     .Param("string", "string")
-    //Allows for a body of content.  Only used for POSt and PUT verb
+    //Allows for a body of content.  Used for POST, PUT and DELETE.  The body is overriden if Param() is used
     .Body("string")
     //Set the host of the target server
     //Useful when you want to reuse a test suite between multiple Uris
@@ -119,7 +120,7 @@ Utilize these tools to validate your JSON schema
 
 [v3 Schema Validator](http://jsonschema.net/previous/)
 
-[v4 Schema Validator](http://json-schema-validator.herokuapp.com/)
+[v4 Schema Validator](http://jsonschema.net)
 
 ## More Examples
 

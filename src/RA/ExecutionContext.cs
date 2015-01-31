@@ -74,19 +74,9 @@ namespace RA
 
         private HttpRequestMessage BuildGet()
         {
-            var builder = new UriBuilder(_httpActionContext.Url());
-            var query = HttpUtility.ParseQueryString(builder.Query);
-
-            foreach (var param in _setupContext.Params())
-            {
-                query.Add(param.Key, param.Value);
-            }
-
-            builder.Query = query.ToString();
-
             var request = new HttpRequestMessage()
             {
-                RequestUri = new Uri(builder.ToString()),
+                RequestUri = BuildUri(),
                 Method = HttpMethod.Get
             };
 
@@ -99,7 +89,7 @@ namespace RA
         {
             var request = new HttpRequestMessage()
             {
-                RequestUri = _httpActionContext.Uri(),
+                RequestUri = BuildUri(),
                 Method = HttpMethod.Post
             };
 
@@ -119,7 +109,7 @@ namespace RA
         {
             var request = new HttpRequestMessage()
             {
-                RequestUri = _httpActionContext.Uri(),
+                RequestUri = BuildUri(),
                 Method = HttpMethod.Put
             };
 
@@ -139,7 +129,7 @@ namespace RA
         {
             var request = new HttpRequestMessage()
             {
-                RequestUri = _httpActionContext.Uri(),
+                RequestUri = BuildUri(),
                 Method = HttpMethod.Delete
             };
 
@@ -153,6 +143,20 @@ namespace RA
                 request.Content = new StringContent(_setupContext.Body(), Encoding.UTF8, _setupContext.HeaderContentType().FirstOrDefault());
 
             return request;
+        }
+
+        private Uri BuildUri()
+        {
+            var builder = new UriBuilder(_httpActionContext.Url());
+            var query = HttpUtility.ParseQueryString(builder.Query);
+
+            foreach (var queryString in _setupContext.Queries())
+            {
+                query.Add(queryString.Key, queryString.Value);
+            }
+
+            builder.Query = query.ToString();
+            return new Uri(builder.ToString());
         }
 
         private void BuildHeaders(HttpRequestMessage request)
@@ -229,21 +233,6 @@ namespace RA
                 );
 
         }
-
-        //private ResponseContext BuildFromRestResponse(IRestResponse restResponse)
-        //{
-        //    return new ResponseContext(
-        //        restResponse.StatusCode,
-        //        restResponse.ContentType,
-        //        restResponse.ContentEncoding,
-        //        restResponse.ContentLength,
-        //        restResponse.Content,
-        //        restResponse.Headers.Select(x => new KeyValuePair<string, string>(x.Name, x.Value.ToString()))
-        //            .ToDictionary(x => x.Key, x => x.Value),
-        //        _loadReponses.ToList()
-        //        );
-
-        //}
 
         public ExecutionContext Debug()
         {
