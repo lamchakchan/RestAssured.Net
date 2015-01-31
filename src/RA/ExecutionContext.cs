@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
-using System.Net.Cache;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using Nito.AsyncEx;
-using RestSharp;
 using RA.Extensions;
 
 namespace RA
@@ -28,29 +30,32 @@ namespace RA
     {
         private readonly SetupContext _setupContext;
         private readonly HttpActionContext _httpActionContext;
-        private readonly RestClient _restClient;
-        private RestRequest _restRequest;
+        private readonly HttpClient _httpClient;
         private ConcurrentQueue<LoadResponse> _loadReponses = new ConcurrentQueue<LoadResponse>(); 
 
         public ExecutionContext(SetupContext setupContext, HttpActionContext httpActionContext)
         {
             _setupContext = setupContext;
             _httpActionContext = httpActionContext;
-            _restClient = new RestClient(_httpActionContext.Uri().SchemeAndHost());
+
+            var handler = new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            };
+            _httpClient = new HttpClient(handler, true);
         }
 
         public ResponseContext Then()
         {
-            var request = Build();
-
             if (_httpActionContext.IsLoadTest())
-                StartCallsForLoad(request);
+                StartCallsForLoad();
 
-            return BuildFromRestResponse(_restClient.Execute(request));
+            var response = AsyncContext.Run(async () => await _httpClient.SendAsync(BuildRequest()));
+            return BuildFromResponse(response);
         }
 
         #region HttpAction Strategy
-        private RestRequest Build()
+        private HttpRequestMessage BuildRequest()
         {
             switch (_httpActionContext.HttpAction())
             {
@@ -67,107 +72,102 @@ namespace RA
             }
         }
 
-        private RestRequest BuildGet()
+        private HttpRequestMessage BuildGet()
         {
-            var request = new RestRequest(_httpActionContext.Uri().PathAndQuery, Method.GET);
-
-            var headers = _setupContext.Headers();
-
-            if (headers.Any())
-                request.Parameters.RemoveAll(x => x.Type == ParameterType.HttpHeader);
-
-            foreach (var header in headers)
-            {
-                request.AddHeader(header.Key, header.Value);
-            }
+            var builder = new UriBuilder(_httpActionContext.Url());
+            var query = HttpUtility.ParseQueryString(builder.Query);
 
             foreach (var param in _setupContext.Params())
             {
-                request.AddParameter(param.Key, param.Value, ParameterType.QueryString);
+                query.Add(param.Key, param.Value);
             }
+
+            builder.Query = query.ToString();
+
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri(builder.ToString()),
+                Method = HttpMethod.Get
+            };
+
+            BuildHeaders(request);
+            
+            return request;
+        }
+
+        private HttpRequestMessage BuildPost()
+        {
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = _httpActionContext.Uri(),
+                Method = HttpMethod.Post
+            };
+
+            BuildHeaders(request);
+
+            if (_setupContext.Params().Any())
+                request.Content =
+                    new FormUrlEncodedContent(
+                        _setupContext.Params().Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToList());
+            else
+                request.Content = new StringContent(_setupContext.Body(), Encoding.UTF8, _setupContext.HeaderContentType().FirstOrDefault());
 
             return request;
         }
 
-        private RestRequest BuildPost()
+        private HttpRequestMessage BuildPut()
         {
-            var request = new RestRequest(_httpActionContext.Uri().PathAndQuery, Method.POST);
-
-            var headers = _setupContext.Headers();
-
-            if (headers.Any())
-                request.Parameters.RemoveAll(x => x.Type == ParameterType.HttpHeader);
-
-            foreach (var header in headers)
+            var request = new HttpRequestMessage()
             {
-                request.AddHeader(header.Key, header.Value);
-            }
+                RequestUri = _httpActionContext.Uri(),
+                Method = HttpMethod.Put
+            };
 
-            foreach (var param in _setupContext.Params())
-            {
-                request.AddParameter(param.Key, param.Value, ParameterType.GetOrPost);
-            }
+            BuildHeaders(request);
 
-            request.RequestFormat = DataFormat.Json;
-            request.AddParameter("text/json", _setupContext.Body(), ParameterType.RequestBody);
+            if (_setupContext.Params().Any())
+                request.Content =
+                    new FormUrlEncodedContent(
+                        _setupContext.Params().Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToList());
+            else
+                request.Content = new StringContent(_setupContext.Body(), Encoding.UTF8, _setupContext.HeaderContentType().FirstOrDefault());
 
             return request;
         }
 
-        private RestRequest BuildPut()
+        private HttpRequestMessage BuildDelete()
         {
-            var request = new RestRequest(_httpActionContext.Uri().PathAndQuery, Method.PUT);
-
-            var headers = _setupContext.Headers();
-
-            if (headers.Any())
-                request.Parameters.RemoveAll(x => x.Type == ParameterType.HttpHeader);
-
-            foreach (var header in headers)
+            var request = new HttpRequestMessage()
             {
-                request.AddHeader(header.Key, header.Value);
-            }
+                RequestUri = _httpActionContext.Uri(),
+                Method = HttpMethod.Delete
+            };
 
-            foreach (var param in _setupContext.Params())
-            {
-                request.AddParameter(param.Key, param.Value, ParameterType.GetOrPost);
-            }
+            BuildHeaders(request);
 
-            request.RequestFormat = DataFormat.Json;
-            request.AddParameter("text/json", _setupContext.Body(), ParameterType.RequestBody);
+            if (_setupContext.Params().Any())
+                request.Content =
+                    new FormUrlEncodedContent(
+                        _setupContext.Params().Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToList());
+            else
+                request.Content = new StringContent(_setupContext.Body(), Encoding.UTF8, _setupContext.HeaderContentType().FirstOrDefault());
 
             return request;
         }
 
-        private RestRequest BuildDelete()
+        private void BuildHeaders(HttpRequestMessage request)
         {
-            var request = new RestRequest(_httpActionContext.Uri().PathAndQuery, Method.DELETE);
-
-            var headers = _setupContext.Headers();
-
-            if (headers.Any())
-                request.Parameters.RemoveAll(x => x.Type == ParameterType.HttpHeader);
-
-            foreach (var header in headers)
-            {
-                request.AddHeader(header.Key, header.Value);
-            }
-
-            foreach (var param in _setupContext.Params())
-            {
-                request.AddParameter(param.Key, param.Value, ParameterType.GetOrPost);
-            }
-
-            request.RequestFormat = DataFormat.Json;
-            request.AddParameter("text/json", _setupContext.Body(), ParameterType.RequestBody);
-
-            return request;
+            _setupContext.HeaderAccept().ForEach(x => request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(x)));
+            _setupContext.HeaderAcceptEncoding().ForEach(x => request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue(x)));
+            _setupContext.HeaderAcceptCharset().ForEach(x => request.Headers.AcceptCharset.Add(new StringWithQualityHeaderValue(x)));
+            _setupContext.HeaderForEverythingElse().ForEach(x => request.Headers.Add(x.Key, x.Value));
         }
+
         #endregion
 
         #region Load Test Code
 
-        public void StartCallsForLoad(RestRequest request)
+        public void StartCallsForLoad()
         {
             ServicePointManager.DefaultConnectionLimit = _httpActionContext.Threads();
 
@@ -176,7 +176,10 @@ namespace RA
             var taskThreads = new List<Task>();
             for(var i = 0; i < _httpActionContext.Threads(); i++)
             {
-                taskThreads.Add(Task.Run(async () => await SingleThread(request, cancellationTokenSource.Token), cancellationTokenSource.Token));
+                taskThreads.Add(Task.Run(async () =>
+                {
+                    await SingleThread(cancellationTokenSource.Token);
+                }, cancellationTokenSource.Token));
             }
 
             Timer timer = null;
@@ -189,21 +192,21 @@ namespace RA
             AsyncContext.Run(async () => await Task.WhenAll(taskThreads));
         }
 
-        public async Task SingleThread(RestRequest request, CancellationToken cancellationToken)
+        public async Task SingleThread(CancellationToken cancellationToken)
         {
             do
             {
-                await MeasureSingleCall(request);
+                await MeasureSingleCall();
             } while (!cancellationToken.IsCancellationRequested); 
         }
 
-        public async Task MeasureSingleCall(RestRequest request)
+        public async Task MeasureSingleCall()
         {
             var loadResponse = new LoadResponse(-1, -1);
             _loadReponses.Enqueue(loadResponse);
             var watch = new Stopwatch();
             watch.Start();
-            var response = await _restClient.ExecuteTaskAsync(request);
+            var response = await _httpClient.SendAsync(BuildRequest());
             watch.Stop();
             loadResponse.StatusCode = (int) response.StatusCode;
             loadResponse.Ticks = watch.ElapsedTicks;
@@ -211,20 +214,36 @@ namespace RA
 
         #endregion
 
-        private ResponseContext BuildFromRestResponse(IRestResponse restResponse)
+        private ResponseContext BuildFromResponse(HttpResponseMessage response)
         {
+            var content = AsyncContext.Run(async () => await response.Content.ReadAsStringAsync());
+
             return new ResponseContext(
-                restResponse.StatusCode,
-                restResponse.ContentType,
-                restResponse.ContentEncoding,
-                restResponse.ContentLength,
-                restResponse.Content,
-                restResponse.Headers.Select(x => new KeyValuePair<string, string>(x.Name, x.Value.ToString()))
-                    .ToDictionary(x => x.Key, x => x.Value),
+                response.StatusCode,
+                response.Content.Headers.ContentType.MediaType,
+                response.Content.Headers.ContentEncoding.FirstOrDefault(),
+                response.Content.Headers.ContentLength.Value,
+                content,
+                response.Content.Headers.ToDictionary(x => x.Key, x => x.Value),
                 _loadReponses.ToList()
                 );
 
         }
+
+        //private ResponseContext BuildFromRestResponse(IRestResponse restResponse)
+        //{
+        //    return new ResponseContext(
+        //        restResponse.StatusCode,
+        //        restResponse.ContentType,
+        //        restResponse.ContentEncoding,
+        //        restResponse.ContentLength,
+        //        restResponse.Content,
+        //        restResponse.Headers.Select(x => new KeyValuePair<string, string>(x.Name, x.Value.ToString()))
+        //            .ToDictionary(x => x.Key, x => x.Value),
+        //        _loadReponses.ToList()
+        //        );
+
+        //}
 
         public ExecutionContext Debug()
         {

@@ -3,6 +3,17 @@ using System.Collections.Generic;
 
 namespace RA.Extensions
 {
+    public static class EnumerationExtensions
+    {
+        public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
+        {
+            foreach (var item in source)
+            {
+                action.Invoke(item);
+            }
+        } 
+    }
+
     public static class ConsoleExtensions
     {
         public static void WriteHeader(this string source, params object[] objects)

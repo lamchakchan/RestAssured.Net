@@ -2,33 +2,28 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Reflection.Emit;
-using System.Security.Cryptography.X509Certificates;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 using RA.Exceptions;
 using RA.Extensions;
-using RestSharp;
 
 namespace RA
 {
     public class ResponseContext
     {
-        private readonly RestClient _restClient;
-        private readonly RestRequest _restRequest;
         private readonly HttpStatusCode _statusCode;
         private readonly long _contentLength;
         private readonly string _content;
         private readonly string _contentType;
         private readonly string _contentEncoding;
         private dynamic _parsedContent;
-        private readonly Dictionary<string, string> _headers = new Dictionary<string, string>();
+        private readonly Dictionary<string, IEnumerable<string>> _headers = new Dictionary<string, IEnumerable<string>>();
         private readonly Dictionary<string, bool>  _assertions = new Dictionary<string, bool>();
         private readonly List<LoadResponse> _loadResponses;
         private bool _isSchemaValid = false;
         private List<string> _schemaErrors = new List<string>();
 
-        public ResponseContext(HttpStatusCode statusCode, string contentType, string contentEncoding, long contentLength, string content, Dictionary<string, string> headers, List<LoadResponse> loadResponses) 
+        public ResponseContext(HttpStatusCode statusCode, string contentType, string contentEncoding, long contentLength, string content, Dictionary<string, IEnumerable<string>> headers, List<LoadResponse> loadResponses) 
         {
             _statusCode = statusCode;
             _contentType = contentType;

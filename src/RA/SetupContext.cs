@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using RA.Enums;
 using RA.Extensions;
 
 namespace RA
@@ -12,7 +13,18 @@ namespace RA
         private string _uri;
         private string _body;
         private Dictionary<string, string> _headers = new Dictionary<string, string>();
-        private Dictionary<string, string> _parameters = new Dictionary<string, string>(); 
+        private Dictionary<string, string> _parameters = new Dictionary<string, string>();
+
+        private Func<string, IDictionary<string, string>, List<string>> GetHeaderFor = (filter, headers) =>
+        {
+            var value =
+                headers.Where(x => x.Key.Equals(filter, StringComparison.InvariantCultureIgnoreCase))
+                    .Select(x => x.Value)
+                    .DefaultIfEmpty(string.Empty)
+                    .First();
+
+            return !string.IsNullOrEmpty(value) ? value.Split(new[] { ',' }).Select(x => x.Trim()).ToList() : new List<string>();
+        };
 
         public SetupContext Name(string name)
         {
@@ -68,6 +80,36 @@ namespace RA
         public Dictionary<string, string> Headers()
         {
             return _headers.Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToDictionary(x => x.Key, x => x.Value);
+        }
+
+        public List<string> HeaderContentType()
+        {
+            return GetHeaderFor(HeaderType.ContentType.Value, _headers);
+        }
+
+        public List<string> HeaderAccept()
+        {
+            return GetHeaderFor(HeaderType.Accept.Value, _headers);
+        }
+
+        public List<string> HeaderAcceptEncoding()
+        {
+            return GetHeaderFor(HeaderType.AcceptEncoding.Value, _headers);
+        }
+
+        public List<string> HeaderAcceptCharset()
+        {
+            return GetHeaderFor(HeaderType.AcceptCharset.Value, _headers);
+        }
+
+        public Dictionary<string, string> HeaderForEverythingElse()
+        {
+            return
+                _headers.Where(
+                    x =>
+                        !HeaderType.GetAll()
+                            .Any(y => y.Value.Equals(x.Key, StringComparison.InvariantCultureIgnoreCase)))
+                    .ToDictionary(x => x.Key, x => x.Value);
         }
 
         public SetupContext Param(string key, string value)
