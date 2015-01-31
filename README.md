@@ -1,10 +1,6 @@
 # RestAssured.Net
 A simple testing suite for REST based interfaces.  The goal is to provide a tool that is simple to use and produces repeatable results.
 
-## TODO
-- Add hooks for testing against Http Meta such as content type, content size and so forth
-- Add features for processing Xml and possibly other formats.
-
 ## Download
 ### Nuget
 [Nuget RestAssured.Net Info](https://www.nuget.org/packages/RestAssured/)
