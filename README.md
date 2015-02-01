@@ -195,8 +195,41 @@ new RestAssured()
         .Get("http://yourremote.com")
     .Then()
         //Assert Load Test and Print Results
-        .Debug
+        .Debug()
         .TestLoad("good-average", "average-ttl-ms", x => x > 100 && x < 400)
         .Assert("good-average");
         
+```
+
+### Using Body
+```C#
+new RestAssured()
+    .Given()
+        .Name("Using body #1")
+        .Header("Content-Type", "application/json")
+        .Body("{ 'id' : 'fuzzywuzzy', 'address' : { 'street1' : '123 Main St', 'city' : 'Brooklyn'}}")
+    .When()
+        .Post("http://yourremote.com")
+    .Then()
+        .Debug()
+```
+
+```C#
+var body = new {
+  id = "fuzzywuzzy",
+  address = new {
+    street1 = "123 Main St",
+    city = "Brooklyn"
+  }
+};
+
+new RestAssured()
+    .Given()
+        .Name("Using body #2")
+        .Header("Content-Type", "application/json")
+        .Body(body)
+    .When()
+        .Post("http://yourremote.com")
+    .Then()
+        .Debug()
 ```
