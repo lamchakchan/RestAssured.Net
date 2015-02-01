@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using RA.Enums;
 using RA.Extensions;
 
@@ -92,13 +92,28 @@ namespace RA
 
         /// <summary>
         /// Set a body of content to be used with a POST/PUT/DELETE action.
-        /// This is usually a blob of JSON or XML.  The body will not be used if Params exist.
+        /// This is usually a string blob of JSON or XML.  The body will not be used if Params exist.
         /// </summary>
         /// <param name="body"></param>
         /// <returns></returns>
         public SetupContext Body(string body)
         {
             _body = body;
+            return this;
+        }
+
+        /// <summary>
+        /// Set a body of content to be used with a POST/PUT/DELETE action.
+        /// An object will be serialized into JSON or XML.  The body will not be used if Params exist.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="body"></param>
+        /// <returns></returns>
+        public SetupContext Body<T>(T body) where T : class
+        {
+            //In the future, this needs to detect the content type and use
+            //the correct serializer.
+            _body = JsonConvert.SerializeObject(body);
             return this;
         }
 

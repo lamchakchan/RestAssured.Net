@@ -64,8 +64,10 @@ The call chains are structured around 4 main parts.
     .Query("string", "string")
     //Add parameters for the body of the request if it is POST, PUT or DELETE
     .Param("string", "string")
-    //Allows for a body of content.  Used for POST, PUT and DELETE.  The body is overriden if Param() is used
+    //Allows for a string content such as JSON or XML.  Used for POST, PUT and DELETE.  The body is overriden if Param() is used
     .Body("string")
+    //Allows for an object to be serialized to JSON or XML.  Used for POST, PUT and DELETE.  The body is overriden if Param() is used
+    .Body<T>(T object)
     //Set the host of the target server
     //Useful when you want to reuse a test suite between multiple Uris
     .Host("string")
