@@ -243,3 +243,21 @@ new RestAssured()
     .Then()
         .Debug()
 ```
+
+### Using File
+```C#
+new RestAssured()
+    .Given()
+        .Name("Uploading a file")
+        .Param("id", "some identifier")
+        //First parameter is your file name
+        //Second parameter is the name associated to the section of content in the multipart/form
+        //Default to the name "file"
+        //Third parameter describes the content type that is being added in the byte array
+        //Fourth parameter the byte array of content
+        .File("fileName", "file", "images/jpeg", File.ReadAllBytes(@"c:\path\to\image"))
+    .When()
+        .Post("http://yourremote.com")
+    .Then()
+        .Debug()
+```
