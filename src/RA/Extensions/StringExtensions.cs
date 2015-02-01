@@ -11,5 +11,10 @@
         {
             return !string.IsNullOrEmpty(source);
         }
+
+        public static string Quote(this string source)
+        {
+            return "\"" + source + "\"";
+        }
     }
 }

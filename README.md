@@ -68,6 +68,9 @@ The call chains are structured around 4 main parts.
     .Body("string")
     //Allows for an object to be serialized to JSON or XML.  Used for POST, PUT and DELETE.  The body is overriden if Param() is used
     .Body<T>(T object)
+    //Add a file as part of the request.  Doing so will convert the body to a multipart/form request.  Used for POST, PUT and DELETE
+    //eg: "file name", "file", "image/jpeg", File.ReadAllBytes("pathtofile")
+    .File("string", "string", "string", byte[])
     //Set the host of the target server
     //Useful when you want to reuse a test suite between multiple Uris
     .Host("string")
@@ -145,6 +148,13 @@ maximum-ttl-ms
 minimum-ttl-ms
 ```
 
+###Request Body
+The request body type is dynamically determined based on the types of input specified.  Here is the
+strategy for the body construct.
+
+1. If File is present, create multipart/form
+2. If Param is present, create urlencoded/form
+3. Default to contents in Body.
 
 ## JSON Schema Support
 ResAssured leverages Newtonsoft.Json for its JSON parsing and JSON schema validation support.  

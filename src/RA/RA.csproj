@@ -62,6 +62,7 @@
     <Compile Include="Extensions\ConsoleExtensions.cs" />
     <Compile Include="Extensions\GuardExtensions.cs" />
     <Compile Include="Extensions\UriExtension.cs" />
+    <Compile Include="FileContent.cs" />
     <Compile Include="Headspring\Enumeration.cs" />
     <Compile Include="HttpActionContext.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />

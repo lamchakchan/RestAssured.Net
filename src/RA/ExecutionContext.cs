@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -69,7 +70,7 @@ namespace RA
                 Method = HttpMethod.Get
             };
 
-            BuildHeaders(request);
+            AppendHeaders(request);
             
             return request;
         }
@@ -82,14 +83,9 @@ namespace RA
                 Method = HttpMethod.Post
             };
 
-            BuildHeaders(request);
+            AppendHeaders(request);
 
-            if (_setupContext.Params().Any())
-                request.Content =
-                    new FormUrlEncodedContent(
-                        _setupContext.Params().Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToList());
-            else
-                request.Content = new StringContent(_setupContext.Body(), Encoding.UTF8, _setupContext.HeaderContentType().FirstOrDefault());
+            request.Content = BuildContent();
 
             return request;
         }
@@ -102,14 +98,9 @@ namespace RA
                 Method = HttpMethod.Put
             };
 
-            BuildHeaders(request);
+            AppendHeaders(request);
 
-            if (_setupContext.Params().Any())
-                request.Content =
-                    new FormUrlEncodedContent(
-                        _setupContext.Params().Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToList());
-            else
-                request.Content = new StringContent(_setupContext.Body(), Encoding.UTF8, _setupContext.HeaderContentType().FirstOrDefault());
+            request.Content = BuildContent();
 
             return request;
         }
@@ -122,14 +113,9 @@ namespace RA
                 Method = HttpMethod.Delete
             };
 
-            BuildHeaders(request);
+            AppendHeaders(request);
 
-            if (_setupContext.Params().Any())
-                request.Content =
-                    new FormUrlEncodedContent(
-                        _setupContext.Params().Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToList());
-            else
-                request.Content = new StringContent(_setupContext.Body(), Encoding.UTF8, _setupContext.HeaderContentType().FirstOrDefault());
+            request.Content = BuildContent();
 
             return request;
         }
@@ -148,12 +134,60 @@ namespace RA
             return new Uri(builder.ToString());
         }
 
-        private void BuildHeaders(HttpRequestMessage request)
+        private void AppendHeaders(HttpRequestMessage request)
         {
             _setupContext.HeaderAccept().ForEach(x => request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(x)));
             _setupContext.HeaderAcceptEncoding().ForEach(x => request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue(x)));
             _setupContext.HeaderAcceptCharset().ForEach(x => request.Headers.AcceptCharset.Add(new StringWithQualityHeaderValue(x)));
             _setupContext.HeaderForEverythingElse().ForEach(x => request.Headers.Add(x.Key, x.Value));
+        }
+
+        #endregion
+
+        #region Content Buildup Strategry
+
+        private HttpContent BuildContent()
+        {
+            if (_setupContext.Files().Any())
+                return BuildMultipartContent();
+            if (_setupContext.Params().Any())
+                return BuildFormContent();
+
+            return BuildStringContent();
+        }
+
+        private HttpContent BuildMultipartContent()
+        {
+            var content = new MultipartFormDataContent();
+
+            _setupContext.Params().ForEach(x => content.Add(new StringContent(x.Value), x.Key.Quote()));
+
+            _setupContext.Files().ForEach(x =>
+            {
+                var fileContent = new ByteArrayContent(x.Content);
+                fileContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
+                {
+                    Name = x.ContentDispositionName.Quote(),
+                    FileName = x.FileName
+                };
+                fileContent.Headers.ContentType = new MediaTypeHeaderValue(x.ContentType);
+
+                content.Add(fileContent);
+            });
+
+            return content;
+        }
+
+        private HttpContent BuildFormContent()
+        {
+            return new FormUrlEncodedContent(
+                _setupContext.Params().Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToList());
+        }
+
+        private HttpContent BuildStringContent()
+        {
+            return new StringContent(_setupContext.Body(), Encoding.UTF8,
+                _setupContext.HeaderContentType().FirstOrDefault());
         }
 
         #endregion

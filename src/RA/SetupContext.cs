@@ -15,7 +15,8 @@ namespace RA
         private string _body;
         private Dictionary<string, string> _headers = new Dictionary<string, string>();
         private Dictionary<string, string> _parameters = new Dictionary<string, string>();
-        private Dictionary<string, string> _queryStrings = new Dictionary<string, string>(); 
+        private Dictionary<string, string> _queryStrings = new Dictionary<string, string>();
+        private List<FileContent> _files = new List<FileContent>(); 
 
         private Func<string, IDictionary<string, string>, List<string>> GetHeaderFor = (filter, headers) =>
         {
@@ -124,6 +125,29 @@ namespace RA
         public string Body()
         {
             return _body;
+        }
+
+        /// <summary>
+        /// Set a file to be used with a POST/PUT/DELETE action.  Adding a file will convert the body
+        /// to a multipart/form.
+        /// </summary>
+        /// <param name="fileName">Name of file</param>
+        /// <param name="contentType">eg: image/jpeg or application/octet-stream</param>
+        /// <param name="content">Byte array of the data.  File.ReadAllBytes()</param>
+        /// <returns></returns>
+        public SetupContext File(string fileName, string contentDispositionName, string contentType, byte[] content)
+        {
+            _files.Add(new FileContent(fileName, contentDispositionName, contentType, content));
+            return this;
+        }
+
+        /// <summary>
+        /// Returns all files.
+        /// </summary>
+        /// <returns></returns>
+        public List<FileContent> Files()
+        {
+            return _files.Select(x => new FileContent(x.FileName, x.ContentDispositionName, x.ContentType, x.Content)).ToList();
         }
 
         /// <summary>
@@ -274,6 +298,11 @@ namespace RA
             foreach (var parameter in _parameters)
             {
                 setupContext.Param(parameter.Key, parameter.Value);
+            }
+
+            foreach (var file in _files)
+            {
+                setupContext.File(file.FileName, file.ContentDispositionName, file.ContentType, file.Content);
             }
 
             return setupContext;
