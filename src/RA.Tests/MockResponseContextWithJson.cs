@@ -10,11 +10,12 @@ namespace RA.Tests
     [TestFixture]
     public class MockResponseContextWithJson
     {
-        private ResponseContext _response;
+        private ResponseContext _responseWithObject;
+        private ResponseContext _responseWithArray;
 
         public MockResponseContextWithJson()
         {
-            var responseContent =
+            var responseObjectContent =
                 "{" +
                     "\"id\":\"3a6b4e0b-8e5c-df11-849b-0014c258f21e\", " +
                     "\"products\": [" +
@@ -22,6 +23,12 @@ namespace RA.Tests
                         "{\"id\" : \"065983e6-092a-491b-99b0-be3de3fe74c9\", \"name\" : \"wizzy bang\"}" +
                     "]" +
                 "}";
+            var responseArrayContent = 
+                "[" +
+                    "{\"key\":\"AL\", \"value\":\"Alabama\"}," +
+                    "{\"key\":\"AK\", \"value\":\"Alaska\"}" +
+                "]";
+
             var header = new Dictionary<string, IEnumerable<string>>()
                          {
                              {
@@ -30,13 +37,14 @@ namespace RA.Tests
                              }
                          };
             var loadResults = new List<LoadResponse>() {new LoadResponse(200, 78978078)};
-            _response = new ResponseContext(HttpStatusCode.OK, responseContent, header, loadResults);
+            _responseWithObject = new ResponseContext(HttpStatusCode.OK, responseObjectContent, header, loadResults);
+            _responseWithArray = new ResponseContext(HttpStatusCode.OK, responseArrayContent, header, loadResults);
         }
 
         [Test]
         public void RootIdShouldBeValid()
         {
-            _response
+            _responseWithObject
                 .TestBody("root id exist", x => x.id.ToString() == "3a6b4e0b-8e5c-df11-849b-0014c258f21e")
                 .Assert("root id exist");
         }
@@ -44,7 +52,7 @@ namespace RA.Tests
         [Test]
         public void ProductCountShouldBeTwo()
         {
-            _response
+            _responseWithObject
                 .TestBody("there is two products", x => x.products.Count == 2)
                 .Assert("there is two products");
         }
@@ -52,7 +60,7 @@ namespace RA.Tests
         [Test]
         public void SecondProductShouldHaveNameWizzyBang()
         {
-            _response
+            _responseWithObject
                 .TestBody("second product has a name", x => x.products[1].name == "wizzy bang")
                 .Assert("second product has a name");
         }
@@ -61,7 +69,7 @@ namespace RA.Tests
         [ExpectedException(typeof(AssertException))]
         public void AccessingMissingNameShouldThrow()
         {
-            _response
+            _responseWithObject
                 .TestBody("should blow up", x => x.products[0].name == "")
                 .Assert("should blow up");
         }
@@ -70,7 +78,7 @@ namespace RA.Tests
         [ExpectedException(typeof (ArgumentException))]
         public void DuplicateRuleShouldThrow()
         {
-            _response
+            _responseWithObject
                 .TestBody("should blow up again", x => x.product[1].name != "")
                 .TestBody("should blow up again", x => x.product[1].name != "");
         }
@@ -78,7 +86,7 @@ namespace RA.Tests
         [Test]
         public void TestV3ValidSchema()
         {
-            _response
+            _responseWithObject
                 .Schema(Resource.V3ValidSchema);
         }
 
@@ -86,7 +94,7 @@ namespace RA.Tests
         [ExpectedException(typeof(ArgumentException))]
         public void TestV3InvalidSchema()
         {
-            _response
+            _responseWithObject
                 .Schema(Resource.V3InvalidSchema);
         }
 
@@ -94,7 +102,7 @@ namespace RA.Tests
         [ExpectedException(typeof (AssertException))]
         public void TestV3RestrictiveSchema()
         {
-            _response
+            _responseWithObject
                 .Schema(Resource.V3RestrictiveSchema)
                 .AssertSchema();
         }
@@ -102,7 +110,7 @@ namespace RA.Tests
         [Test]
         public void TestHeaderWithContentTypeUpperCased()
         {
-            _response
+            _responseWithObject
                 .TestHeader("content header has app/json uppper", "CONTENT=TYPE", x => x == "application/json")
                 .Assert("content header has app/json upper");
         }
@@ -110,7 +118,7 @@ namespace RA.Tests
         [Test]
         public void TestHeaderWithContentTypeLowerCased()
         {
-            _response
+            _responseWithObject
                 .TestHeader("content header has app/json lower", "content-type", x => x.Contains("application/json"))
                 .Assert("content header has app/json lower");
         }
@@ -118,7 +126,7 @@ namespace RA.Tests
         [Test]
         public void TestLoadForTotalCall()
         {
-            _response
+            _responseWithObject
                 .TestLoad("load for total call", "total-call", x => x > 0)
                 .Assert("load for total call");
         }
@@ -127,7 +135,7 @@ namespace RA.Tests
         [ExpectedException(typeof(AssertException))]
         public void TestLoadforMoreThanTotalCallShouldThrow()
         {
-            _response
+            _responseWithObject
                 .TestLoad("load for more than total call", "total-call", x => x > 3)
                 .Assert("load for more than total call");
         }
@@ -135,23 +143,31 @@ namespace RA.Tests
         [Test]
         public void TestV4ValidSchema()
         {
-            _response
+            _responseWithObject
                 .Schema(Resource.V4ValidSchema);
         }
 
         [Test]
         public void WriteAssertions()
         {
-            _response.WriteAssertions();
+            _responseWithObject.WriteAssertions();
         }
 
         [Test]
         public void RetrieveShouldPass()
         {
-            var id = _response.Retrieve(x => x.id);
-            var name = _response.Retrieve(x => x.products[1].name);
+            var id = _responseWithObject.Retrieve(x => x.id);
+            var name = _responseWithObject.Retrieve(x => x.products[1].name);
             Assert.AreEqual(id, "3a6b4e0b-8e5c-df11-849b-0014c258f21e");
             Assert.AreEqual(name, "wizzy bang");
+        }
+
+        [Test]
+        public void ArrayResponseContentShouldPass()
+        {
+            _responseWithArray
+                .TestBody("first item has AL", x => x[0].key == "AL")
+                .Assert("first item has AL");
         }
     }
 }
