@@ -131,6 +131,9 @@ The call chains are structured around 4 main parts.
     .AssertAll()
     //Output all of the test results
     .WriteAssertions()
+    //Retrieve a value from the response body
+    //eg: x => x.id
+    .Retrieve(Func<dynamic, object>)
     //Debug the response
     .Debug()
 ```
@@ -188,7 +191,7 @@ var endpoint2 = endpoint1.Clone().Uri("/endpoint2");
 //Do a GET action with the first endpoint configuration
 endpoint1.When().Get().Then().TestBody("test 1", x => x.id != null).Assert("test 1");
 
-//Do a POSt action with the second endpoint configuration
+//Do a POST action with the second endpoint configuration
 endpoint2.When().Post().Then().TestBody("test 1", x => x.id != null).Assert("test 1");
 ```
 
@@ -260,4 +263,15 @@ new RestAssured()
         .Post("http://yourremote.com")
     .Then()
         .Debug()
+```
+
+### Retrieving an object
+```C#
+var id = new RestAssured()
+    .Given()
+        .Name("Retrieve an item in the document")
+    .When()
+        .Get("http://yourremote.com")
+    .Then()
+        .Retrieve(x => x.id);
 ```

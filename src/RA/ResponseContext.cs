@@ -33,6 +33,28 @@ namespace RA
         }
 
         /// <summary>
+        /// Retrieve an object from the response document.
+        /// </summary>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public object Retrieve(Func<dynamic, object> func)
+        {
+            try
+            {
+                return func.Invoke(_parsedContent).Value;
+            }
+            catch { }
+
+            try
+            {
+                return func.Invoke(_parsedContent);
+            }
+            catch { }
+
+            return null;
+        }
+
+        /// <summary>
         /// Setup a test against the body of response document.
         /// </summary>
         /// <param name="ruleName"></param>

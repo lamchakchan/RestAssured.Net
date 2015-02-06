@@ -144,5 +144,14 @@ namespace RA.Tests
         {
             _response.WriteAssertions();
         }
+
+        [Test]
+        public void RetrieveShouldPass()
+        {
+            var id = _response.Retrieve(x => x.id);
+            var name = _response.Retrieve(x => x.products[1].name);
+            Assert.AreEqual(id, "3a6b4e0b-8e5c-df11-849b-0014c258f21e");
+            Assert.AreEqual(name, "wizzy bang");
+        }
     }
 }
