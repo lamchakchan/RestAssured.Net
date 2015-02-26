@@ -38,6 +38,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\Resource.Designer.cs">
@@ -45,6 +46,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resource.resx</DependentUpon>
     </Compile>
+    <Compile Include="InvalidCallTest.cs" />
     <Compile Include="JsonIpIntegration.cs" />
     <Compile Include="LoadIntegrationTest.cs" />
     <Compile Include="MockResponseContextWithJson.cs" />

@@ -67,6 +67,7 @@
     <Compile Include="HttpActionContext.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="LoadResponse.cs" />
+    <Compile Include="Net\HttpResponseMessageWrapper.cs" />
     <Compile Include="ResponseContext.cs" />
     <Compile Include="SetupContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

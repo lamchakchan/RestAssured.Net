@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Nito.AsyncEx;
 using RA.Extensions;
+using RA.Net;
 
 namespace RA
 {
@@ -40,7 +41,7 @@ namespace RA
             if (_httpActionContext.IsLoadTest())
                 StartCallsForLoad();
 
-            var response = AsyncContext.Run(async () => await _httpClient.SendAsync(BuildRequest()));
+            var response = AsyncContext.Run(async () => await ExecuteCall());
             return BuildFromResponse(response);
         }
 
@@ -144,7 +145,7 @@ namespace RA
 
         #endregion
 
-        #region Content Buildup Strategry
+        #region Content Buildup Strategy
 
         private HttpContent BuildContent()
         {
@@ -223,32 +224,40 @@ namespace RA
         {
             do
             {
-                await MeasureSingleCall();
+                await MapCall();
             } while (!cancellationToken.IsCancellationRequested); 
         }
 
-        public async Task MeasureSingleCall()
+        public async Task MapCall()
         {
             var loadResponse = new LoadResponse(-1, -1);
             _loadReponses.Enqueue(loadResponse);
-            var watch = new Stopwatch();
-            watch.Start();
-            var response = await _httpClient.SendAsync(BuildRequest());
-            watch.Stop();
-            loadResponse.StatusCode = (int) response.StatusCode;
-            loadResponse.Ticks = watch.ElapsedTicks;
+
+            var result = await ExecuteCall();
+            loadResponse.StatusCode = (int) result.Response.StatusCode;
+            loadResponse.Ticks = result.ElaspedExecution.Ticks;
         }
 
         #endregion
 
-        private ResponseContext BuildFromResponse(HttpResponseMessage response)
+        private async Task<HttpResponseMessageWrapper> ExecuteCall()
         {
-            var content = AsyncContext.Run(async () => await response.Content.ReadAsStringAsync());
+            var watch = new Stopwatch();
+            watch.Start();
+            var response = await _httpClient.SendAsync(BuildRequest());
+            watch.Stop();
+            return new HttpResponseMessageWrapper {ElaspedExecution = watch.Elapsed, Response = response};
+        }
+
+        private ResponseContext BuildFromResponse(HttpResponseMessageWrapper result)
+        {
+            var content = AsyncContext.Run(async () => await result.Response.Content.ReadAsStringAsync());
 
             return new ResponseContext(
-                response.StatusCode,
+                result.Response.StatusCode,
                 content,
-                response.Content.Headers.ToDictionary(x => x.Key.Trim(), x => x.Value),
+                result.Response.Content.Headers.ToDictionary(x => x.Key.Trim(), x => x.Value),
+                result.ElaspedExecution,
                 _loadReponses.ToList()
                 );
 

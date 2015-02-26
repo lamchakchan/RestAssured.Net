@@ -16,17 +16,20 @@ namespace RA
         private readonly string _content;
         private dynamic _parsedContent;
         private readonly Dictionary<string, IEnumerable<string>> _headers = new Dictionary<string, IEnumerable<string>>();
+        private TimeSpan _elapsedExecutionTime;
         private readonly Dictionary<string, double> _loadValues = new Dictionary<string, double>(); 
         private readonly Dictionary<string, bool>  _assertions = new Dictionary<string, bool>();
         private readonly List<LoadResponse> _loadResponses;
         private bool _isSchemaValid = false;
         private List<string> _schemaErrors = new List<string>();
+        
 
-        public ResponseContext(HttpStatusCode statusCode, string content, Dictionary<string, IEnumerable<string>> headers, List<LoadResponse> loadResponses) 
+        public ResponseContext(HttpStatusCode statusCode, string content, Dictionary<string, IEnumerable<string>> headers, TimeSpan elaspedExecutionTime, List<LoadResponse> loadResponses) 
         {
             _statusCode = statusCode;
             _content = content;
             _headers = headers;
+            _elapsedExecutionTime = elaspedExecutionTime;
             _loadResponses = loadResponses ?? new List<LoadResponse>();
 
             Initialize();
@@ -75,6 +78,17 @@ namespace RA
         public ResponseContext TestHeader(string ruleName, string key, Func<string, bool> func)
         {
             return TestWrapper(ruleName, () => func.Invoke(HeaderValue(key.Trim())));
+        }
+
+        /// <summary>
+        /// Setup a test against the response time (total milliseconds)
+        /// </summary>
+        /// <param name="ruleName"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        public ResponseContext TestElaspedTime(string ruleName, Func<double, bool> func)
+        {
+            return TestWrapper(ruleName, () => func.Invoke(_elapsedExecutionTime.TotalMilliseconds));
         }
 
         /// <summary>

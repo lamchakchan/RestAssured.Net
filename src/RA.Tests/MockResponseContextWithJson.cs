@@ -12,6 +12,8 @@ namespace RA.Tests
     {
         private ResponseContext _responseWithObject;
         private ResponseContext _responseWithArray;
+        private readonly static int _mockElaspedMs = 500;
+        private TimeSpan _mockElaspedTimespan = new TimeSpan(0, 0, 0, 0, _mockElaspedMs);
 
         public MockResponseContextWithJson()
         {
@@ -37,8 +39,8 @@ namespace RA.Tests
                              }
                          };
             var loadResults = new List<LoadResponse>() {new LoadResponse(200, 78978078)};
-            _responseWithObject = new ResponseContext(HttpStatusCode.OK, responseObjectContent, header, loadResults);
-            _responseWithArray = new ResponseContext(HttpStatusCode.OK, responseArrayContent, header, loadResults);
+            _responseWithObject = new ResponseContext(HttpStatusCode.OK, responseObjectContent, header, _mockElaspedTimespan, loadResults);
+            _responseWithArray = new ResponseContext(HttpStatusCode.OK, responseArrayContent, header, _mockElaspedTimespan, loadResults);
         }
 
         [Test]
@@ -168,6 +170,23 @@ namespace RA.Tests
             _responseWithArray
                 .TestBody("first item has AL", x => x[0].key == "AL")
                 .Assert("first item has AL");
+        }
+
+        [Test]
+        public void GreaterExecutionTimeShouldPass()
+        {
+            _responseWithObject
+                .TestElaspedTime("faster elasped time", x => x > _mockElaspedMs - 1)
+                .Assert("faster elasped time");
+        }
+
+        [Test]
+        [ExpectedException(typeof (AssertException))]
+        public void LesserExecutionTimeShouldFail()
+        {
+            _responseWithObject
+                .TestElaspedTime("slower elasped time", x => x > _mockElaspedMs + 1)
+                .Assert("slower elasped time");
         }
     }
 }
