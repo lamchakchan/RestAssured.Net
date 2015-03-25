@@ -216,19 +216,30 @@ namespace RA
 
             if (contentType.Contains("json"))
             {
-                try
+                if (!string.IsNullOrEmpty(_content))
                 {
-                    _parsedContent = JObject.Parse(_content);
-                    return;    
-                }
-                catch { }
+                    try
+                    {
+                        _parsedContent = JObject.Parse(_content);
+                        return;
+                    }
+                    catch
+                    {
+                    }
 
-                try
+                    try
+                    {
+                        _parsedContent = JArray.Parse(_content);
+                        return;
+                    }
+                    catch
+                    {
+                    }
+                }
+                else
                 {
-                    _parsedContent = JArray.Parse(_content);
                     return;
                 }
-                catch { }
             }
 
             throw new Exception(string.Format("({0}) not supported", contentType));

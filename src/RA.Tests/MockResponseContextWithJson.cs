@@ -12,6 +12,7 @@ namespace RA.Tests
     {
         private ResponseContext _responseWithObject;
         private ResponseContext _responseWithArray;
+        private ResponseContext _responseWithNothing;
         private readonly static int _mockElaspedMs = 500;
         private TimeSpan _mockElaspedTimespan = new TimeSpan(0, 0, 0, 0, _mockElaspedMs);
 
@@ -41,6 +42,7 @@ namespace RA.Tests
             var loadResults = new List<LoadResponse>() {new LoadResponse(200, 78978078)};
             _responseWithObject = new ResponseContext(HttpStatusCode.OK, responseObjectContent, header, _mockElaspedTimespan, loadResults);
             _responseWithArray = new ResponseContext(HttpStatusCode.OK, responseArrayContent, header, _mockElaspedTimespan, loadResults);
+            _responseWithNothing = new ResponseContext(HttpStatusCode.OK, "", header, _mockElaspedTimespan, loadResults);
         }
 
         [Test]
@@ -187,6 +189,14 @@ namespace RA.Tests
             _responseWithObject
                 .TestElaspedTime("slower elasped time", x => x > _mockElaspedMs + 1)
                 .Assert("slower elasped time");
+        }
+
+        [Test]
+        public void EmptyResponseShouldPass()
+        {
+            _responseWithNothing
+                .TestStatus("is-ok", x => x == 200)
+                .Assert("is-ok");
         }
     }
 }
