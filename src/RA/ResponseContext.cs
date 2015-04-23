@@ -242,7 +242,8 @@ namespace RA
                 }
             }
 
-            throw new Exception(string.Format("({0}) not supported", contentType));
+            if(!string.IsNullOrEmpty(_content))
+                throw new Exception(string.Format("({0}) not supported", contentType));
         }
 
         private void ParseLoad()

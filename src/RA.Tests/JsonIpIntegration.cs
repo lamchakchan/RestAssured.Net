@@ -21,7 +21,7 @@ namespace RA.Tests
     }
 
     [TestFixture]
-    public class KnotPostIntegration
+    public class KnotIntegration
     {
         [Test]
         public void TestPost()
@@ -31,7 +31,7 @@ namespace RA.Tests
                     .Header("Content-Type", "application/json")
                     .Header("Accept-Encoding", "gzip, deflate")
                     .Host("http://qa.services.theknot.com")
-                    .Uri("/local-partners-search/v1/storefronts")
+                    .Uri("/local-partners/marketplace/v1/storefronts")
                     .Query("apikey", "ca7f6e91ee8134de9717707d86b29100")
                     .Body("{ 'Id': [323920, '3a6b4e0b-8e5c-df11-849b-0014c258f21e'] }")
                 .When()
@@ -39,6 +39,23 @@ namespace RA.Tests
                     .Post()
                 .Then()
                     .Debug();
+        }
+
+        [Test]
+        public void TestEmptyHealth()
+        {
+            new RestAssured()
+                .Given()
+                    .Header("Content-Type", "application/json")
+                    .Header("Accept-Encoding", "gzip, deflate")
+                    .Host("http://qa.services.theknot.com")
+                    .Uri("/local-partners/selfservice/healthy")
+                    //.Uri("/local-partners/marketplace/health/connected")
+                    .Query("apikey", "ca7f6e91ee8134de9717707d86b29100")
+                .When()
+                    .Get()
+                .Then()
+                    .Debug();            
         }
     }
 }

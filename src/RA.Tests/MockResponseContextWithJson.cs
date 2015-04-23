@@ -39,10 +39,14 @@ namespace RA.Tests
                                  new List<string> {"application/json"}
                              }
                          };
+
+            var emptyHeader = new Dictionary<string, IEnumerable<string>>();
+
+
             var loadResults = new List<LoadResponse>() {new LoadResponse(200, 78978078)};
             _responseWithObject = new ResponseContext(HttpStatusCode.OK, responseObjectContent, header, _mockElaspedTimespan, loadResults);
             _responseWithArray = new ResponseContext(HttpStatusCode.OK, responseArrayContent, header, _mockElaspedTimespan, loadResults);
-            _responseWithNothing = new ResponseContext(HttpStatusCode.OK, "", header, _mockElaspedTimespan, loadResults);
+            _responseWithNothing = new ResponseContext(HttpStatusCode.OK, "", emptyHeader, _mockElaspedTimespan, loadResults);
         }
 
         [Test]
