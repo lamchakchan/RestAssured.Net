@@ -69,6 +69,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Data\ConversationSchema.txt" />
     <Content Include="Data\V3InvalidSchema.txt" />
     <Content Include="Data\V3RestrictiveSchema.txt" />
     <Content Include="Data\V3ValidSchema.txt" />

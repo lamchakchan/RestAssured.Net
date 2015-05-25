@@ -157,7 +157,12 @@ namespace RA
 
             IList<string> messages;
 
-            _isSchemaValid = JObject.Parse(_content).IsValid(jSchema, out messages);
+            var trimmedContent = _content.TrimStart();
+
+            _isSchemaValid =
+                trimmedContent.StartsWith("{")
+                    ? JObject.Parse(_content).IsValid(jSchema, out messages)
+                    : JArray.Parse(_content).IsValid(jSchema, out messages);
 
             if (!_isSchemaValid)
             {

@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using RestAssured.Tests.Data;
 
 namespace RA.Tests
 {
@@ -56,6 +57,25 @@ namespace RA.Tests
                     .Get()
                 .Then()
                     .Debug();            
+        }
+
+        [Test]
+        public void TestConversation()
+        {
+            new RestAssured()
+                .Given()
+                    .Header("Content-Type", "application/json")
+                    .Host("http://qa.services.theknot.com")
+                    .Uri("/local-partners/conversations/bride")
+                    .Query("apikey", "ca7f6e91ee8134de9717707d86b29100")
+                    .Query("memberId", "5491024343143956")
+                    .Query("d", "1")
+                .When()
+                    .Get()
+                .Then()
+                    .Schema(Resource.ConversationSchema)
+                    .Debug()
+                    .AssertSchema();
         }
     }
 }

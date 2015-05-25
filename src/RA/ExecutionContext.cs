@@ -152,8 +152,10 @@ namespace RA
                 return BuildMultipartContent();
             if (_setupContext.Params().Any())
                 return BuildFormContent();
+            if (!string.IsNullOrEmpty(_setupContext.Body()))
+                return BuildStringContent();
 
-            return BuildStringContent();
+            return null;
         }
 
         private HttpContent BuildMultipartContent()
