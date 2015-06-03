@@ -270,6 +270,17 @@ new RestAssured()
 ```
 
 ### Retrieving an object
+Value returned from http://yourremote.com
+```Javascript
+{ 
+    id : 12345, 
+    detail : { 
+        name : 'stuff' 
+    } 
+}
+```
+
+The follow code from the above response value will set id to 12345
 ```C#
 var id = new RestAssured()
     .Given()
