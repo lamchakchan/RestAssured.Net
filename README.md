@@ -115,11 +115,12 @@ The call chains are structured around 4 main parts.
     //Write a test to make an assertion against the response header
     //eg: "test B", "content-type", x => x.Contains("json")
     .TestHeader("string", "string", Func<string, bool>)
-    //Write a test to make an assertion against the RTT (elaspec round trip time) for the call.
-    //eg: "test C", "maximum ttl", x => x < 1000)
+    //Write a test to make an assertion against the RTT (elasped round trip time) for the call.
+    //eg: "test C", x => x < 1000)
     .TestElaspedTime("string", Func<double, bool>)
     //Write a test to make an assertion against load test results.  Refer to the Reference section below for complete list of keys.
-    //eg: "test D", "average-ttl-ms", x => x < 1000 && x > 0
+    //eg: "test D1", "average-ttl-ms", x => x < 1000 && x > 0
+    //eg: "test D2", "total-call", x => x >= 234
     .TestLoad("string", "string", Func<double, bool>)
     //Write a test to make an assertion against the response status code
     //eg: "test E", x => x == 200
