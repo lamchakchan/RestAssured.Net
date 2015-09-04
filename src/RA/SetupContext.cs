@@ -16,7 +16,8 @@ namespace RA
         private Dictionary<string, string> _headers = new Dictionary<string, string>();
         private Dictionary<string, string> _parameters = new Dictionary<string, string>();
         private Dictionary<string, string> _queryStrings = new Dictionary<string, string>();
-        private List<FileContent> _files = new List<FileContent>(); 
+        private List<FileContent> _files = new List<FileContent>();
+        private bool _useContentMD5;
 
         private Func<string, IDictionary<string, string>, List<string>> GetHeaderFor = (filter, headers) =>
         {
@@ -164,6 +165,17 @@ namespace RA
             return this;
         }
 
+        public SetupContext UseContentMD5Header()
+        {
+            _useContentMD5 = true;
+            return this;
+        }
+
+        public bool ContentMD5()
+        {
+            return _useContentMD5;
+        }
+
         /// <summary>
         /// Return all headers.
         /// </summary>
@@ -207,6 +219,15 @@ namespace RA
         public List<string> HeaderAcceptCharset()
         {
             return GetHeaderFor(HeaderType.AcceptCharset.Value, _headers);
+        }
+
+        /// <summary>
+        /// Return the value for an accept-charset header.
+        /// </summary>
+        /// <returns></returns>
+        public List<string> HeaderAuthorization()
+        {
+            return GetHeaderFor(HeaderType.Authorization.Value, _headers);
         }
 
         /// <summary>

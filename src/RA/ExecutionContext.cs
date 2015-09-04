@@ -6,7 +6,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -21,16 +23,21 @@ namespace RA
         private readonly SetupContext _setupContext;
         private readonly HttpActionContext _httpActionContext;
         private readonly HttpClient _httpClient;
-        private ConcurrentQueue<LoadResponse> _loadReponses = new ConcurrentQueue<LoadResponse>(); 
+        private ConcurrentQueue<LoadResponse> _loadReponses = new ConcurrentQueue<LoadResponse>();
 
         public ExecutionContext(SetupContext setupContext, HttpActionContext httpActionContext)
         {
             _setupContext = setupContext;
             _httpActionContext = httpActionContext;
 
-            var handler = new HttpClientHandler
+            var httpClientHandler = new HttpClientHandler
             {
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+            };
+
+            var handler = !_setupContext.ContentMD5() ? (HttpMessageHandler) httpClientHandler : new ContentMd5Handler()
+            {
+                InnerHandler = httpClientHandler
             };
             _httpClient = new HttpClient(handler, true);
         }
@@ -47,19 +54,26 @@ namespace RA
         #region HttpAction Strategy
         private HttpRequestMessage BuildRequest()
         {
+            HttpRequestMessage message = null;
             switch (_httpActionContext.HttpAction())
             {
                 case HttpActionType.GET:
-                    return BuildGet();
+                    message = BuildGet();
+                    break;
                 case HttpActionType.POST:
-                    return BuildPost();
+                    message = BuildPost();
+                    break;
                 case HttpActionType.PUT:
-                    return BuildPut();
+                    message = BuildPut();
+                    break;
                 case HttpActionType.DELETE:
-                    return BuildDelete();
+                    message = BuildDelete();
+                    break;
                 default:
                     throw new Exception("should not have gotten here");
             }
+
+            return message;
         }
 
         private HttpRequestMessage BuildGet()
@@ -139,7 +153,13 @@ namespace RA
             _setupContext.HeaderAccept().ForEach(x => request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(x)));
             _setupContext.HeaderAcceptEncoding().ForEach(x => request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue(x)));
             _setupContext.HeaderAcceptCharset().ForEach(x => request.Headers.AcceptCharset.Add(new StringWithQualityHeaderValue(x)));
-            _setupContext.HeaderForEverythingElse().ForEach(x => request.Headers.Add(x.Key, x.Value));
+            _setupContext.HeaderAuthorization().ForEach(x =>
+            {
+                var match = Regex.Match(x, "^\\s?(?<scheme>.*)\\s(?<parameter>.*)");
+                request.Headers.Authorization = new AuthenticationHeaderValue(match.Groups["scheme"].Value, match.Groups["parameter"].Value);
+            });
+            _setupContext.HeaderForEverythingElse().ForEach(x => request.Headers.TryAddWithoutValidation(x.Key, x.Value));
+            
         }
 
         #endregion

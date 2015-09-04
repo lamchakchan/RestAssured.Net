@@ -55,6 +55,7 @@
     <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ContentMd5Handler.cs" />
     <Compile Include="Enums\HeaderType.cs" />
     <Compile Include="Enums\LoadValueTypes.cs" />
     <Compile Include="Exceptions\AssertException.cs" />
