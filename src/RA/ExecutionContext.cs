@@ -21,7 +21,7 @@ namespace RA
         private readonly SetupContext _setupContext;
         private readonly HttpActionContext _httpActionContext;
         private readonly HttpClient _httpClient;
-        private ConcurrentQueue<LoadResponse> _loadReponses = new ConcurrentQueue<LoadResponse>(); 
+        private ConcurrentQueue<LoadResponse> _loadReponses = new ConcurrentQueue<LoadResponse>();
 
         public ExecutionContext(SetupContext setupContext, HttpActionContext httpActionContext)
         {
@@ -55,6 +55,8 @@ namespace RA
                     return BuildPost();
                 case HttpActionType.PUT:
                     return BuildPut();
+                case HttpActionType.PATCH:
+                    return BuildPatch();
                 case HttpActionType.DELETE:
                     return BuildDelete();
                 default:
@@ -71,7 +73,7 @@ namespace RA
             };
 
             AppendHeaders(request);
-            
+
             return request;
         }
 
@@ -96,6 +98,21 @@ namespace RA
             {
                 RequestUri = BuildUri(),
                 Method = HttpMethod.Put
+            };
+
+            AppendHeaders(request);
+
+            request.Content = BuildContent();
+
+            return request;
+        }
+
+        private HttpRequestMessage BuildPatch()
+        {
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = BuildUri(),
+                Method = new HttpMethod("PATCH")
             };
 
             AppendHeaders(request);
@@ -203,7 +220,7 @@ namespace RA
             var cancellationTokenSource = new CancellationTokenSource();
 
             var taskThreads = new List<Task>();
-            for(var i = 0; i < _httpActionContext.Threads(); i++)
+            for (var i = 0; i < _httpActionContext.Threads(); i++)
             {
                 taskThreads.Add(Task.Run(async () =>
                 {
@@ -213,10 +230,10 @@ namespace RA
 
             Timer timer = null;
             timer = new Timer((ignore) =>
-                              {
-                                  timer.Dispose();
-                                  cancellationTokenSource.Cancel();
-                              }, null, TimeSpan.FromSeconds(_httpActionContext.Seconds()), TimeSpan.FromMilliseconds(-1));
+            {
+                timer.Dispose();
+                cancellationTokenSource.Cancel();
+            }, null, TimeSpan.FromSeconds(_httpActionContext.Seconds()), TimeSpan.FromMilliseconds(-1));
 
             AsyncContext.Run(async () => await Task.WhenAll(taskThreads));
         }
@@ -226,7 +243,7 @@ namespace RA
             do
             {
                 await MapCall();
-            } while (!cancellationToken.IsCancellationRequested); 
+            } while (!cancellationToken.IsCancellationRequested);
         }
 
         public async Task MapCall()
@@ -235,7 +252,7 @@ namespace RA
             _loadReponses.Enqueue(loadResponse);
 
             var result = await ExecuteCall();
-            loadResponse.StatusCode = (int) result.Response.StatusCode;
+            loadResponse.StatusCode = (int)result.Response.StatusCode;
             loadResponse.Ticks = result.ElaspedExecution.Ticks;
         }
 
@@ -247,7 +264,7 @@ namespace RA
             watch.Start();
             var response = await _httpClient.SendAsync(BuildRequest());
             watch.Stop();
-            return new HttpResponseMessageWrapper {ElaspedExecution = watch.Elapsed, Response = response};
+            return new HttpResponseMessageWrapper { ElaspedExecution = watch.Elapsed, Response = response };
         }
 
         private ResponseContext BuildFromResponse(HttpResponseMessageWrapper result)
