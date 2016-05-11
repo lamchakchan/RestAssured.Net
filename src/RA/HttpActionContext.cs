@@ -8,6 +8,7 @@ namespace RA
         GET,
         POST,
         PUT,
+        PATCH,
         DELETE
     }
 
@@ -118,6 +119,16 @@ namespace RA
         public ExecutionContext Put(string url = null)
         {
             return SetHttpAction(url, HttpActionType.PUT);
+        }
+
+        /// <summary>
+        /// Configure test with a PATCH verb.  The url parameter is optional if similar info was provided through the setup context.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public ExecutionContext Patch(string url = null)
+        {
+            return SetHttpAction(url, HttpActionType.PATCH);
         }
 
         /// <summary>
