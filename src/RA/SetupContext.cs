@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using Newtonsoft.Json;
 using RA.Enums;
 using RA.Extensions;
@@ -28,6 +30,8 @@ namespace RA
 
             return !string.IsNullOrEmpty(value) ? value.Split(new[] { ',' }).Select(x => x.Trim()).ToList() : new List<string>();
         };
+
+        private HttpClient _httpClient;
 
         /// <summary>
         /// Setup the name of the test suite.
@@ -266,6 +270,24 @@ namespace RA
         public Dictionary<string, string> Queries()
         {
             return _queryStrings.Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToDictionary(x => x.Key, x => x.Value);
+        }
+
+        public SetupContext HttpClient(HttpClient client)
+        {
+            _httpClient = client;
+            return this;
+        }
+
+        public HttpClient HttpClient()
+        {
+            if (_httpClient != null) return _httpClient;
+
+            var handler = new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            };
+            _httpClient = new HttpClient(handler, true);
+            return _httpClient;
         }
 
         public HttpActionContext When()
