@@ -7,7 +7,7 @@
     <ProjectGuid>{7555C9B3-DBAB-43B0-B5F3-473823451A88}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RestAssured.Tests</RootNamespace>
+    <RootNamespace>RA.Tests</RootNamespace>
     <AssemblyName>RestAssured.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -55,6 +55,7 @@
     <Compile Include="JsonIpIntegration.cs" />
     <Compile Include="LoadIntegrationTest.cs" />
     <Compile Include="MockResponseContextWithJson.cs" />
+    <Compile Include="MockSetupContextWithExternalHttpClient.cs" />
     <Compile Include="MockSetupContextWithJson.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

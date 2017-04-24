@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using NUnit.Framework;
 using RA.Exceptions;
-using RestAssured.Tests.Data;
+using RA.Tests.Data;
 
 namespace RA.Tests
 {

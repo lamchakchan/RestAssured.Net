@@ -15,6 +15,7 @@ namespace RA
         private string _host;
         private string _uri;
         private string _body;
+        private HttpClient _httpClient;
         private Dictionary<string, string> _headers = new Dictionary<string, string>();
         private Dictionary<string, string> _parameters = new Dictionary<string, string>();
         private Dictionary<string, string> _queryStrings = new Dictionary<string, string>();
@@ -31,7 +32,7 @@ namespace RA
             return !string.IsNullOrEmpty(value) ? value.Split(new[] { ',' }).Select(x => x.Trim()).ToList() : new List<string>();
         };
 
-        private HttpClient _httpClient;
+
 
         /// <summary>
         /// Setup the name of the test suite.
@@ -136,6 +137,7 @@ namespace RA
         /// to a multipart/form.
         /// </summary>
         /// <param name="fileName">Name of file</param>
+        /// <param name="contentDispositionName"></param>
         /// <param name="contentType">eg: image/jpeg or application/octet-stream</param>
         /// <param name="content">Byte array of the data.  File.ReadAllBytes()</param>
         /// <returns></returns>
@@ -305,7 +307,8 @@ namespace RA
                 .Name(_name)
                 .Host(_host)
                 .Uri(_uri)
-                .Body(_body);
+                .Body(_body)
+                .HttpClient(_httpClient);
 
             foreach (var header in _headers)
             {
