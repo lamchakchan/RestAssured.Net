@@ -196,17 +196,18 @@ namespace RA
         }
 
         /// <summary>
-        /// Assert all test and schema for validity.  Failures will produce an AssertException.
+        /// Assert all test and schema for validity. You can optionally skip schema validation.  Failures will produce an AssertException.
         /// </summary>
-        public void AssertAll()
+        /// /// <param name="assertSchema"></param>
+        public void AssertAll(bool assertSchema = true)
         {
             foreach (var assertion in _assertions)
             {
-                if(!assertion.Value)
+                if (!assertion.Value)
                     throw new AssertException(string.Format("({0}) Test Failed", assertion.Key));
             }
-
-            AssertSchema();
+            if (assertSchema)
+                AssertSchema();
         }
 
         private void Initialize()
