@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using RestAssured.Tests.Data;
+using RA.Tests.Data;
 
 namespace RA.Tests
 {

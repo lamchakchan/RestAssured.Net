@@ -28,11 +28,7 @@ namespace RA
             _setupContext = setupContext;
             _httpActionContext = httpActionContext;
 
-            var handler = new HttpClientHandler
-            {
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
-            };
-            _httpClient = new HttpClient(handler, true);
+            _httpClient = _setupContext.HttpClient();
         }
 
         public ResponseContext Then()
