@@ -91,6 +91,13 @@ namespace RA.Tests
         }
 
         [Test]
+        public void NoSchemaShouldPass()
+        {
+            _responseWithObject
+                .AssertAll();
+        }
+
+        [Test]
         public void GreaterExecutionTimeShouldPass()
         {
             _responseWithObject
@@ -203,6 +210,7 @@ namespace RA.Tests
         {
             _responseWithObject
                 .Schema(Resource.V3ValidSchema);
+            _responseWithObject.AssertAll();
         }
 
         [Test]
@@ -210,6 +218,7 @@ namespace RA.Tests
         {
             _responseWithObject
                 .Schema(Resource.V4ValidSchema);
+            _responseWithObject.AssertAll();
         }
 
         [Test]

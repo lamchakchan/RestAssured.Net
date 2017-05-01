@@ -39,5 +39,36 @@ namespace RA.Tests
             Assert.AreEqual(_setup.Body(),
                 "{\"id\":\"4fc99dd1-9aad-4d63-a247-75c9b72de204\",\"company1\":{\"name\":\"Foo\"},\"company2\":{\"name\":\"f00Baz\"}}");
         }
+
+        [Test]
+        public void UriWithPort()
+        {
+           _setup
+                .Host("localhost")
+                .Port(1500)
+                .Uri("/test");
+
+            var httpContext = _setup.When();
+            httpContext.SetUrl(null);
+
+            Assert.AreEqual("localhost:1500", _setup.Host());
+            Assert.AreEqual("http://localhost:1500/test", httpContext.Url());
+        }
+
+        [Test]
+        public void UrlUsingHttps()
+        {
+            _setup
+                .Host("localhost")
+                .Port(1500)
+                .Uri("/test")
+                .UseHttps();
+
+            var httpContext = _setup.When();
+            httpContext.SetUrl(null);
+
+            Assert.AreEqual("localhost:1500", _setup.Host());
+            Assert.AreEqual("https://localhost:1500/test", httpContext.Url());
+        }
     }
 }
