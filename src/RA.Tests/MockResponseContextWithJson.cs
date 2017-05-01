@@ -226,5 +226,24 @@ namespace RA.Tests
         {
             _responseWithObject.WriteAssertions();
         }
+
+        [Test]
+        public void AllowMultipleNamedAssertions()
+        {
+            _responseWithObject
+                .TestStatus("first", code => code == 200)
+                .TestBody("second", body => body.id != null)
+                .Assert("first")
+                .Assert("second");
+        }
+
+        [Test]
+        public void AllowMultipleWithoutSchemaAssertion()
+        {
+            _responseWithObject
+                .TestStatus("first", code => code == 200)
+                .TestBody("second", body => body.id != null)
+                .AssertAll();
+        }
     }
 }
