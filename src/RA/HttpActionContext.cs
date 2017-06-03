@@ -163,14 +163,14 @@ namespace RA
             return new ExecutionContext(_setupContext, this);
         }
 
-        private void SetUrl(string url)
+        internal void SetUrl(string url)
         {
             if (url.IsEmpty() && _setupContext.Host().IsEmpty())
                 throw new ArgumentException("url must be provided");
 
             var uri = url.IsNotEmpty()
-                ? new Uri(url.FixProtocol())
-                : new Uri(new Uri(_setupContext.Host().FixProtocol()), _setupContext.Uri());
+                ? new Uri(url.FixProtocol(_setupContext.UsesHttps()))
+                : new Uri(new Uri(_setupContext.Host().FixProtocol(_setupContext.UsesHttps())), _setupContext.Uri());
 
             _url = uri.OriginalString;
         }

@@ -91,6 +91,13 @@ namespace RA.Tests
         }
 
         [Test]
+        public void NoSchemaShouldPass()
+        {
+            _responseWithObject
+                .AssertAll();
+        }
+
+        [Test]
         public void GreaterExecutionTimeShouldPass()
         {
             _responseWithObject
@@ -203,6 +210,7 @@ namespace RA.Tests
         {
             _responseWithObject
                 .Schema(Resource.V3ValidSchema);
+            _responseWithObject.AssertAll();
         }
 
         [Test]
@@ -210,12 +218,32 @@ namespace RA.Tests
         {
             _responseWithObject
                 .Schema(Resource.V4ValidSchema);
+            _responseWithObject.AssertAll();
         }
 
         [Test]
         public void WriteAssertions()
         {
             _responseWithObject.WriteAssertions();
+        }
+
+        [Test]
+        public void AllowMultipleNamedAssertions()
+        {
+            _responseWithObject
+                .TestStatus("first", code => code == 200)
+                .TestBody("second", body => body.id != null)
+                .Assert("first")
+                .Assert("second");
+        }
+
+        [Test]
+        public void AllowMultipleWithoutSchemaAssertion()
+        {
+            _responseWithObject
+                .TestStatus("first", code => code == 200)
+                .TestBody("second", body => body.id != null)
+                .AssertAll();
         }
     }
 }

@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using Nito.AsyncEx;
+using RA.Enums;
 using RA.Extensions;
 using RA.Net;
 
@@ -149,7 +150,8 @@ namespace RA
 
         private void AppendHeaders(HttpRequestMessage request)
         {
-            _setupContext.HeaderAccept().ForEach(x => request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(x)));
+            // httpclient default headers must be used because otherwise no value like "application/json;version=1" is allowed.
+            _setupContext.HeaderAccept().ForEach(x => _httpClient.DefaultRequestHeaders.Add(HeaderType.Accept.Value, x));
             _setupContext.HeaderAcceptEncoding().ForEach(x => request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue(x)));
             _setupContext.HeaderAcceptCharset().ForEach(x => request.Headers.AcceptCharset.Add(new StringWithQualityHeaderValue(x)));
             _setupContext.HeaderForEverythingElse().ForEach(x => request.Headers.Add(x.Key, x.Value));

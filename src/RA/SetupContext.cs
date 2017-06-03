@@ -13,9 +13,11 @@ namespace RA
     {
         private string _name;
         private string _host;
+        private int _port;
         private string _uri;
         private string _body;
         private HttpClient _httpClient;
+        private bool _useHttps;
         private Dictionary<string, string> _headers = new Dictionary<string, string>();
         private Dictionary<string, string> _parameters = new Dictionary<string, string>();
         private Dictionary<string, string> _queryStrings = new Dictionary<string, string>();
@@ -67,12 +69,29 @@ namespace RA
         }
 
         /// <summary>
+        /// Sets the port used for the interaction 
+        /// e.g. localhost:1465 
+        /// </summary>
+        /// <param name="port"></param>
+        /// <returns></returns>
+        public SetupContext Port(int port)
+        {
+            _port = port;
+            return this;
+        }
+
+        /// <summary>
         /// Returns the host value.
         /// </summary>
         /// <returns></returns>
         public string Host()
         {
-            return _host;
+            return PortSpecified() ? $"{_host}:{_port}":_host;
+        }
+
+        private bool PortSpecified()
+        {
+            return _port > 0 && _port != 88;
         }
 
         /// <summary>
@@ -290,6 +309,22 @@ namespace RA
             };
             _httpClient = new HttpClient(handler, true);
             return _httpClient;
+        }
+
+        /// <summary>
+        /// Determines that the protocol will be HTTPS insted of HTTP
+        /// e.g. https://...
+        /// </summary>
+        /// <returns></returns>
+        public SetupContext UseHttps()
+        {
+            _useHttps = true;
+            return this;
+        }
+
+        public bool UsesHttps()
+        {
+            return _useHttps;
         }
 
         public HttpActionContext When()

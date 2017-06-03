@@ -10,10 +10,11 @@ namespace RA.Extensions
                 throw new Exception(message);
         }
 
-        public static string FixProtocol(this string source)
+        public static string FixProtocol(this string source, bool useHttps)
         {
+            var defaultPortocol = useHttps ? "https" : "http";
             if (!source.StartsWith("http://") && !source.StartsWith("https://"))
-                return "http://" + source;
+                return $"{defaultPortocol}://" + source;
 
             return source;
         }

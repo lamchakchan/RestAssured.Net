@@ -20,7 +20,7 @@ namespace RA
         private readonly Dictionary<string, double> _loadValues = new Dictionary<string, double>(); 
         private readonly Dictionary<string, bool>  _assertions = new Dictionary<string, bool>();
         private readonly List<LoadResponse> _loadResponses;
-        private bool _isSchemaValid = false;
+        private bool _isSchemaValid = true;
         private List<string> _schemaErrors = new List<string>();
         
 
@@ -175,13 +175,14 @@ namespace RA
             return this;
         }
 
-        public void Assert(string ruleName)
+        public ResponseContext Assert(string ruleName)
         {
-            if (_assertions.ContainsKey(ruleName))
-            {
-                if(!_assertions[ruleName])
-                    throw new AssertException(string.Format("({0}) Test Failed", ruleName));
-            }
+            if (!_assertions.ContainsKey(ruleName)) return this;
+
+            if(!_assertions[ruleName])
+                throw new AssertException($"({ruleName}) Test Failed");
+            // in order to allow multiple asserts
+            return this;
         }
 
         /// <summary>
