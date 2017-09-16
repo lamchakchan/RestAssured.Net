@@ -7,6 +7,7 @@ using Newtonsoft.Json.Schema;
 using RA.Enums;
 using RA.Exceptions;
 using RA.Extensions;
+using System.Xml.Linq;
 
 namespace RA
 {
@@ -17,14 +18,14 @@ namespace RA
         private dynamic _parsedContent;
         private readonly Dictionary<string, IEnumerable<string>> _headers = new Dictionary<string, IEnumerable<string>>();
         private TimeSpan _elapsedExecutionTime;
-        private readonly Dictionary<string, double> _loadValues = new Dictionary<string, double>(); 
-        private readonly Dictionary<string, bool>  _assertions = new Dictionary<string, bool>();
+        private readonly Dictionary<string, double> _loadValues = new Dictionary<string, double>();
+        private readonly Dictionary<string, bool> _assertions = new Dictionary<string, bool>();
         private readonly List<LoadResponse> _loadResponses;
         private bool _isSchemaValid = true;
         private List<string> _schemaErrors = new List<string>();
-        
 
-        public ResponseContext(HttpStatusCode statusCode, string content, Dictionary<string, IEnumerable<string>> headers, TimeSpan elaspedExecutionTime, List<LoadResponse> loadResponses) 
+
+        public ResponseContext(HttpStatusCode statusCode, string content, Dictionary<string, IEnumerable<string>> headers, TimeSpan elaspedExecutionTime, List<LoadResponse> loadResponses)
         {
             _statusCode = statusCode;
             _content = content;
@@ -114,7 +115,7 @@ namespace RA
         /// <returns></returns>
         public ResponseContext TestStatus(string ruleName, Func<int, bool> func)
         {
-            return TestWrapper(ruleName, () => func.Invoke((int) _statusCode));
+            return TestWrapper(ruleName, () => func.Invoke((int)_statusCode));
         }
 
         private ResponseContext TestWrapper(string ruleName, Func<bool> func)
@@ -179,7 +180,7 @@ namespace RA
         {
             if (!_assertions.ContainsKey(ruleName)) return this;
 
-            if(!_assertions[ruleName])
+            if (!_assertions[ruleName])
                 throw new AssertException($"({ruleName}) Test Failed");
             // in order to allow multiple asserts
             return this;
@@ -248,8 +249,22 @@ namespace RA
                     return;
                 }
             }
+            else if (contentType.Contains("xml"))
+            {
+                if (!string.IsNullOrEmpty(_content))
+                {
+                    try
+                    {
+                        _parsedContent = XDocument.Parse(_content);
+                        return;
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
 
-            if(!string.IsNullOrEmpty(_content))
+            if (!string.IsNullOrEmpty(_content))
                 throw new Exception(string.Format("({0}) not supported", contentType));
         }
 
@@ -276,7 +291,7 @@ namespace RA
             return _headers.Where(x => x.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
                     .Select(x => string.Join(", ", x.Value))
                     .DefaultIfEmpty(string.Empty)
-                    .FirstOrDefault(); 
+                    .FirstOrDefault();
         }
 
         private double LoadValue(string key)
@@ -284,7 +299,7 @@ namespace RA
             return _loadValues.Where(x => x.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
                     .Select(x => x.Value)
                     .DefaultIfEmpty(0)
-                    .FirstOrDefault(); 
+                    .FirstOrDefault();
         }
 
         /// <summary>
