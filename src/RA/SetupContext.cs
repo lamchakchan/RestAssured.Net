@@ -18,11 +18,12 @@ namespace RA
         private string _body;
         private HttpClient _httpClient;
         private bool _useHttps;
-        private Dictionary<string, string> _headers = new Dictionary<string, string>();
-        private Dictionary<string, string> _parameters = new Dictionary<string, string>();
-        private Dictionary<string, string> _queryStrings = new Dictionary<string, string>();
-		private Dictionary<string, string> _cookies = new Dictionary<string, string>();
-        private List<FileContent> _files = new List<FileContent>(); 
+        private readonly Dictionary<string, string> _headers = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _parameters = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _queryStrings = new Dictionary<string, string>();
+		private readonly Dictionary<string, string> _cookies = new Dictionary<string, string>();
+        private readonly List<FileContent> _files = new List<FileContent>();
+	    private TimeSpan? _timeout = null;
 
         private Func<string, IDictionary<string, string>, List<string>> GetHeaderFor = (filter, headers) =>
         {
@@ -116,13 +117,33 @@ namespace RA
             return _uri;
         }
 
-        /// <summary>
-        /// Set a body of content to be used with a POST/PUT/DELETE action.
-        /// This is usually a string blob of JSON or XML.  The body will not be used if Params exist.
-        /// </summary>
-        /// <param name="body"></param>
-        /// <returns></returns>
-        public SetupContext Body(string body)
+		/// <summary>
+		/// Sets the timeout of the HTTP request in milliseconds
+		/// </summary>
+		/// <param name="milliseconds"></param>
+		/// <returns></returns>
+	    public SetupContext Timeout(int milliseconds)
+	    {
+		    _timeout = new TimeSpan(0, 0, 0, 0, milliseconds);
+		    return this;
+	    }
+
+		/// <summary>
+		/// Return the timeout period of the request if configured, otherwise it returns null
+		/// </summary>
+		/// <returns></returns>
+	    public TimeSpan? Timeout()
+	    {
+		    return _timeout;
+	    }
+
+		/// <summary>
+		/// Set a body of content to be used with a POST/PUT/DELETE action.
+		/// This is usually a string blob of JSON or XML.  The body will not be used if Params exist.
+		/// </summary>
+		/// <param name="body"></param>
+		/// <returns></returns>
+		public SetupContext Body(string body)
         {
             _body = body;
             return this;

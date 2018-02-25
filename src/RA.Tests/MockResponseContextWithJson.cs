@@ -13,8 +13,8 @@ namespace RA.Tests
         private readonly ResponseContext _responseWithObject;
         private readonly ResponseContext _responseWithArray;
         private readonly ResponseContext _responseWithNothing;
-        private static readonly int _mockElaspedMs = 500;
-        private readonly TimeSpan _mockElaspedTimespan = new TimeSpan(0, 0, 0, 0, _mockElaspedMs);
+        private static readonly int _mockElapsedMs = 500;
+        private readonly TimeSpan _mockElapsedTimespan = new TimeSpan(0, 0, 0, 0, _mockElapsedMs);
 
         public MockResponseContextWithJson()
         {
@@ -45,10 +45,10 @@ namespace RA.Tests
 
             var loadResults = new List<LoadResponse> {new LoadResponse(200, 78978078)};
             _responseWithObject = new ResponseContext(HttpStatusCode.OK, responseObjectContent, header,
-                _mockElaspedTimespan, loadResults);
+                _mockElapsedTimespan, loadResults);
             _responseWithArray = new ResponseContext(HttpStatusCode.OK, responseArrayContent, header,
-                _mockElaspedTimespan, loadResults);
-            _responseWithNothing = new ResponseContext(HttpStatusCode.OK, "", emptyHeader, _mockElaspedTimespan,
+                _mockElapsedTimespan, loadResults);
+            _responseWithNothing = new ResponseContext(HttpStatusCode.OK, "", emptyHeader, _mockElapsedTimespan,
                 loadResults);
         }
 
@@ -101,8 +101,8 @@ namespace RA.Tests
         public void GreaterExecutionTimeShouldPass()
         {
             _responseWithObject
-                .TestElaspedTime("faster elasped time", x => x > _mockElaspedMs - 1)
-                .Assert("faster elasped time");
+                .TestElaspedTime("faster elapsed time", x => x > _mockElapsedMs - 1)
+                .Assert("faster elapsed time");
         }
 
         [Test]
@@ -111,8 +111,8 @@ namespace RA.Tests
             Assert.Throws<AssertException>(() =>
             {
                 _responseWithObject
-                    .TestElaspedTime("slower elasped time", x => x > _mockElaspedMs + 1)
-                    .Assert("slower elasped time");
+                    .TestElaspedTime("slower elapsed time", x => x > _mockElapsedMs + 1)
+                    .Assert("slower elapsed time");
             });
         }
 
@@ -161,7 +161,7 @@ namespace RA.Tests
         public void TestHeaderWithContentTypeUpperCased()
         {
             _responseWithObject
-                .TestHeader("content header has app/json uppper", "CONTENT=TYPE", x => x == "application/json")
+                .TestHeader("content header has app/json upper", "CONTENT=TYPE", x => x == "application/json")
                 .Assert("content header has app/json upper");
         }
 

@@ -71,7 +71,7 @@ namespace RA
 
             AppendHeaders(request);
 	        AppendCookies(request);
-
+	        SetTimeout();
 
 			return request;
         }
@@ -86,6 +86,7 @@ namespace RA
 
             AppendHeaders(request);
 	        AppendCookies(request);
+	        SetTimeout();
 
 			request.Content = BuildContent();
 
@@ -102,6 +103,7 @@ namespace RA
 
             AppendHeaders(request);
 	        AppendCookies(request);
+	        SetTimeout();
 
 			request.Content = BuildContent();
 
@@ -118,6 +120,7 @@ namespace RA
 
             AppendHeaders(request);
 	        AppendCookies(request);
+	        SetTimeout();
 
 			request.Content = BuildContent();
 
@@ -134,6 +137,7 @@ namespace RA
 
             AppendHeaders(request);
 	        AppendCookies(request);
+	        SetTimeout();
 
 			request.Content = BuildContent();
 
@@ -167,6 +171,14 @@ namespace RA
 	    {
 		    request.Headers.Add("Cookie", string.Join(";", _setupContext.Cookies().Select(x => x.Key + "=" + x.Value)));
 		}
+
+	    private void SetTimeout()
+	    {
+		    if (_setupContext.Timeout().HasValue)
+		    {
+				_httpClient.Timeout = new TimeSpan(_setupContext.Timeout().Value.Ticks);
+		    }
+	    }
 
         #endregion
 
