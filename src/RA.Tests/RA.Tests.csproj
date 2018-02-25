@@ -59,6 +59,7 @@
     <Compile Include="MockSetupContextWithExternalHttpClient.cs" />
     <Compile Include="MockSetupContextWithJson.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TimeoutTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
