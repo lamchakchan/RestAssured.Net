@@ -229,11 +229,27 @@ namespace RA
             return this;
         }
 
-        /// <summary>
-        /// Return all headers.
-        /// </summary>
-        /// <returns></returns>
-        public Dictionary<string, string> Headers()
+	    /// <summary>
+	    /// Sets multiple Http request header value pairs.
+	    /// </summary>
+	    /// <param name="headers"></param>
+	    /// <returns></returns>
+	    public SetupContext Headers(Dictionary<string, string> headers)
+	    {
+		    foreach (var header in headers)
+		    {
+			    if (!_headers.ContainsKey(header.Key))
+				    _headers.Add(header.Key, header.Value);
+		    }
+
+		    return this;
+	    }
+
+		/// <summary>
+		/// Return all headers.
+		/// </summary>
+		/// <returns></returns>
+		public Dictionary<string, string> Headers()
         {
             return _headers.Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToDictionary(x => x.Key, x => x.Value);
         }
@@ -302,6 +318,23 @@ namespace RA
             return this;
         }
 
+	    /// <summary>
+	    /// Set multiple Form value pairs.  This is any key/value pairs that needs to be formatted into the body of the request
+	    /// for POST/PUT/DELETE actions.  Using this will negate the usage of Body()
+	    /// </summary>
+	    /// <param name="key"></param>
+	    /// <param name="value"></param>
+	    /// <returns></returns>
+		public SetupContext Params(Dictionary<string, string> parameters)
+	    {
+		    foreach (var parameter in parameters)
+		    {
+				if (!_parameters.ContainsKey(parameter.Key))
+				    _parameters.Add(parameter.Key, parameter.Value);
+			}
+		    return this;
+		}
+
         /// <summary>
         /// Return form value pairs.
         /// </summary>
@@ -323,6 +356,22 @@ namespace RA
                 _queryStrings.Add(key, value);
             return this;
         }
+
+	    /// <summary>
+	    /// Set multiple Querystring value pairs.  This is any key/value pairs that needs to go into the Url.  This will be emitted with all Http verbs.
+	    /// </summary>
+	    /// <param name="key"></param>
+	    /// <param name="value"></param>
+	    /// <returns></returns>
+		public SetupContext Queries(Dictionary<string, string> queries)
+	    {
+		    foreach (var query in queries)
+		    {
+				if (!_queryStrings.ContainsKey(query.Key))
+					_queryStrings.Add(query.Key, query.Value);
+			}
+		    return this;
+		}
 
         /// <summary>
         /// Return Querystring value pairs.
@@ -387,20 +436,11 @@ namespace RA
                 .Body(_body)
                 .HttpClient(_httpClient);
 
-            foreach (var header in _headers)
-            {
-                setupContext.Header(header.Key, header.Value);
-            }
+	        setupContext.Headers(_headers);
 
-            foreach (var query in _queryStrings)
-            {
-                setupContext.Query(query.Key, query.Value);
-            }
+	        setupContext.Queries(_queryStrings);
 
-            foreach (var parameter in _parameters)
-            {
-                setupContext.Param(parameter.Key, parameter.Value);
-            }
+	        setupContext.Params(_parameters);
 
             foreach (var file in _files)
             {
