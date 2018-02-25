@@ -70,8 +70,10 @@ namespace RA
             };
 
             AppendHeaders(request);
+	        AppendCookies(request);
 
-            return request;
+
+			return request;
         }
 
         private HttpRequestMessage BuildPost()
@@ -83,8 +85,9 @@ namespace RA
             };
 
             AppendHeaders(request);
+	        AppendCookies(request);
 
-            request.Content = BuildContent();
+			request.Content = BuildContent();
 
             return request;
         }
@@ -98,8 +101,9 @@ namespace RA
             };
 
             AppendHeaders(request);
+	        AppendCookies(request);
 
-            request.Content = BuildContent();
+			request.Content = BuildContent();
 
             return request;
         }
@@ -113,8 +117,9 @@ namespace RA
             };
 
             AppendHeaders(request);
+	        AppendCookies(request);
 
-            request.Content = BuildContent();
+			request.Content = BuildContent();
 
             return request;
         }
@@ -128,8 +133,9 @@ namespace RA
             };
 
             AppendHeaders(request);
+	        AppendCookies(request);
 
-            request.Content = BuildContent();
+			request.Content = BuildContent();
 
             return request;
         }
@@ -156,6 +162,11 @@ namespace RA
             _setupContext.HeaderAcceptCharset().ForEach(x => request.Headers.AcceptCharset.Add(new StringWithQualityHeaderValue(x)));
             _setupContext.HeaderForEverythingElse().ForEach(x => request.Headers.Add(x.Key, x.Value));
         }
+
+	    private void AppendCookies(HttpRequestMessage request)
+	    {
+		    request.Headers.Add("Cookie", string.Join(";", _setupContext.Cookies().Select(x => x.Key + "=" + x.Value)));
+		}
 
         #endregion
 

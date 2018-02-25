@@ -21,6 +21,7 @@ namespace RA
         private Dictionary<string, string> _headers = new Dictionary<string, string>();
         private Dictionary<string, string> _parameters = new Dictionary<string, string>();
         private Dictionary<string, string> _queryStrings = new Dictionary<string, string>();
+		private Dictionary<string, string> _cookies = new Dictionary<string, string>();
         private List<FileContent> _files = new List<FileContent>(); 
 
         private Func<string, IDictionary<string, string>, List<string>> GetHeaderFor = (filter, headers) =>
@@ -175,14 +176,53 @@ namespace RA
             return _files.Select(x => new FileContent(x.FileName, x.ContentDispositionName, x.ContentType, x.Content)).ToList();
         }
 
-        /// <summary>
-        /// Set a Http request header value pair.
-        /// eg: key : content-type and value : application/json
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public SetupContext Header(string key, string value)
+		/// <summary>
+		/// Set a cookie value pair.
+		/// eg: name : X-XSRF-TOKEN and value : 123456789
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public SetupContext Cookie(string name, string value)
+	    {
+		    if(!_cookies.ContainsKey(name))
+				_cookies.Add(name, value);
+		    return this;
+	    }
+
+		/// <summary>
+		/// Set cookie value pairs.
+		/// eg: name : X-XSRF-TOKEN and value : 123456789
+		/// </summary>
+		/// <param name="cookies"></param>
+		/// <returns></returns>
+		public SetupContext Cookies(Dictionary<string, string> cookies)
+	    {
+		    foreach (var cookie in cookies)
+		    {
+				if (!_cookies.ContainsKey(cookie.Key))
+					_cookies.Add(cookie.Key, cookie.Value);
+			}
+		    return this;
+	    }
+
+	    /// <summary>
+	    /// Return all cookies.
+	    /// </summary>
+	    /// <returns></returns>
+	    public Dictionary<string, string> Cookies()
+	    {
+		    return _cookies.Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToDictionary(x => x.Key, x => x.Value);
+	    }
+
+		/// <summary>
+		/// Set a Http request header value pair.
+		/// eg: key : content-type and value : application/json
+		/// </summary>
+		/// <param name="key"></param>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public SetupContext Header(string key, string value)
         {
             if (!_headers.ContainsKey(key))
                 _headers.Add(key, value);
@@ -354,7 +394,9 @@ namespace RA
 
             var handler = new HttpClientHandler
             {
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+				//we will add cookies as a header latter in the request
+				UseCookies = false,
             };
             _httpClient = new HttpClient(handler, true);
             return _httpClient;
