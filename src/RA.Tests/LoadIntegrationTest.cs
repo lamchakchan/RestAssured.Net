@@ -14,7 +14,7 @@ namespace RA.Tests
                 .When()
                 //one thread for 15 seconds
                     .Load(1, 10)
-                    .Get("http://www.telize.com/jsonip")
+                    .Get("http://geoip.nekudo.com/api/")
                 .Then()
                     .Debug();
         }
@@ -28,7 +28,7 @@ namespace RA.Tests
                 .When()
                 //one thread for 15 seconds
                     .Load(6, 10)
-                    .Get("http://www.telize.com/jsonip")
+                    .Get("http://geoip.nekudo.com/api/")
                 .Then()
                     .Debug();
         }
