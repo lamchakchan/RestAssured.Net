@@ -1,0 +1,16 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
+                "${workspaceFolder}/src/RA.Tests/RA.Tests.csproj",
+                "--filter RA.Tests.KnotIntegration.TestEmptyHealth"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
