@@ -10,7 +10,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
-using Nito.AsyncEx;
 using RA.Enums;
 using RA.Extensions;
 using RA.Net;
@@ -37,7 +36,8 @@ namespace RA
             if (_httpActionContext.IsLoadTest())
                 StartCallsForLoad();
 
-            var response = AsyncContext.Run(async () => await ExecuteCall());
+            // var response = AsyncContext.Run(async () => await ExecuteCall());
+            var response = ExecuteCall().GetAwaiter().GetResult();
             return BuildFromResponse(response);
         }
 
@@ -256,7 +256,9 @@ namespace RA
                 cancellationTokenSource.Cancel();
             }, null, TimeSpan.FromSeconds(_httpActionContext.Seconds()), TimeSpan.FromMilliseconds(-1));
 
-            AsyncContext.Run(async () => await Task.WhenAll(taskThreads));
+            // swapping this out
+            // AsyncContext.Run(async () => await Task.WhenAll(taskThreads));
+            Task.WhenAll(taskThreads).GetAwaiter().GetResult();
         }
 
         public async Task SingleThread(CancellationToken cancellationToken)
@@ -290,7 +292,8 @@ namespace RA
 
         private ResponseContext BuildFromResponse(HttpResponseMessageWrapper result)
         {
-            var content = AsyncContext.Run(async () => await result.Response.Content.ReadAsStringAsync());
+            // var content = AsyncContext.Run(async () => await result.Response.Content.ReadAsStringAsync());
+            var content = result.Response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
             return new ResponseContext(
                 result.Response.StatusCode,
