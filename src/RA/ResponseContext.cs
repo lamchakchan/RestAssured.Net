@@ -203,8 +203,10 @@ namespace RA
         /// /// <param name="assertSchema"></param>
         public void AssertAll(bool assertSchema = true)
         {
+            Console.WriteLine(_assertions.Count);
             foreach (var assertion in _assertions)
             {
+                Console.WriteLine(assertion.Value);
                 if (!assertion.Value)
                     throw new AssertException(string.Format("({0}) Test Failed", assertion.Key));
             }

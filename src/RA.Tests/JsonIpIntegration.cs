@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using RA.Tests.Data;
+// using RA.Tests.Data;
 
 namespace RA.Tests
 {
@@ -22,8 +22,24 @@ namespace RA.Tests
     }
 
     [TestFixture]
-    public class KnotIntegration
+    public class PublicIntegration
     {
+        [Test]
+        public void TestLoad()
+        {
+            new RestAssured()
+                .Given()
+                    .Header("Content-Type", "application/json")
+                    .Header("Accept-Encoding", "gzip, deflate")
+                    .Host("https://jsonplaceholder.typicode.com")
+                    .Uri("/posts")
+                .When()
+                    .Load(5, 10)
+                    .Get()
+                .Then()
+                    .Debug();
+        }
+        
         [Test]
         public void TestPost()
         {
@@ -31,28 +47,25 @@ namespace RA.Tests
                 .Given()
                     .Header("Content-Type", "application/json")
                     .Header("Accept-Encoding", "gzip, deflate")
-                    .Host("http://qa.services.theknot.com")
-                    .Uri("/local-partners/marketplace/v1/storefronts")
-                    .Query("apikey", "ca7f6e91ee8134de9717707d86b29100")
-                    .Body("{ 'Id': [323920, '3a6b4e0b-8e5c-df11-849b-0014c258f21e'] }")
+                    .Host("https://jsonplaceholder.typicode.com")
+                    .Uri("/posts")
+                    .Body(@"{""id"":1000}")
                 .When()
-                    .Load(5, 10)
                     .Post()
                 .Then()
                     .Debug();
         }
 
         [Test]
-        public void TestEmptyHealth()
+        public void TestHealthy()
         {
             new RestAssured()
                 .Given()
                     .Header("Content-Type", "application/json")
                     .Header("Accept-Encoding", "gzip, deflate")
-                    .Host("http://qa.services.theknot.com")
-                    .Uri("/local-partners/selfservice/healthy")
+                    .Host("https://catalog.data.gov/api/3")
+                    .Uri("/api/3")
                     //.Uri("/local-partners/marketplace/health/connected")
-                    .Query("apikey", "ca7f6e91ee8134de9717707d86b29100")
                 .When()
                     .Get()
                 .Then()
@@ -60,20 +73,19 @@ namespace RA.Tests
         }
 
         [Test]
-        public void TestConversation()
+        public void TestSchemaValidation()
         {
             new RestAssured()
                 .Given()
                     .Header("Content-Type", "application/json")
-                    .Host("http://qa.services.theknot.com")
-                    .Uri("/local-partners/conversations/bride")
-                    .Query("apikey", "ca7f6e91ee8134de9717707d86b29100")
-                    .Query("memberId", "5491024343143956")
-                    .Query("d", "1")
+                    .Header("Accept-Encoding", "gzip, deflate")
+                    .Host("https://catalog.data.gov/api/3")
+                    .Uri("/api/3")
+                    //.Uri("/local-partners/marketplace/health/connected")
                 .When()
                     .Get()
                 .Then()
-                    .Schema(Resource.ConversationSchema)
+                    .Schema(@"{""$id"":""http://example.com/example.json"",""type"":""object"",""definitions"":{},""$schema"":""http://json-schema.org/draft-07/schema#"",""properties"":{""version"":{""$id"":""/properties/version"",""type"":""integer"",""title"":""TheVersionSchema"",""default"":0,""examples"":[3]}}}")
                     .Debug()
                     .AssertSchema();
         }

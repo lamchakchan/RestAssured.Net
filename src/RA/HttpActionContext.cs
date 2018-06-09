@@ -163,7 +163,7 @@ namespace RA
             return new ExecutionContext(_setupContext, this);
         }
 
-        internal void SetUrl(string url)
+        public void SetUrl(string url)
         {
             if (url.IsEmpty() && _setupContext.Host().IsEmpty())
                 throw new ArgumentException("url must be provided");

@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Net;
 using NUnit.Framework;
 using RA.Exceptions;
-using RA.Tests.Data;
+// using RA.Tests.Data;
 
 namespace RA.Tests
 {
     [TestFixture]
     public class MockResponseContextWithJson
     {
-        private readonly ResponseContext _responseWithObject;
+        private readonly ResponseContext _responseWithObject, _responseWithObject2;
         private readonly ResponseContext _responseWithArray;
         private readonly ResponseContext _responseWithNothing;
         private static readonly int _mockElapsedMs = 500;
@@ -46,6 +46,8 @@ namespace RA.Tests
             var loadResults = new List<LoadResponse> {new LoadResponse(200, 78978078)};
             _responseWithObject = new ResponseContext(HttpStatusCode.OK, responseObjectContent, header,
                 _mockElapsedTimespan, loadResults);
+            _responseWithObject2 = new ResponseContext(HttpStatusCode.OK, responseObjectContent, header,
+                _mockElapsedTimespan, loadResults);
             _responseWithArray = new ResponseContext(HttpStatusCode.OK, responseArrayContent, header,
                 _mockElapsedTimespan, loadResults);
             _responseWithNothing = new ResponseContext(HttpStatusCode.OK, "", emptyHeader, _mockElapsedTimespan,
@@ -53,14 +55,19 @@ namespace RA.Tests
         }
 
         [Test]
-        public void AccessingMissingNameShouldThrow()
+        public void NoSchemaShouldPass()
         {
-            Assert.Throws<AssertException>(() =>
-            {
-                _responseWithObject
-                    .TestBody("should blow up", x => x.products[0].name == "")
-                    .Assert("should blow up");
-            });
+            _responseWithObject2
+                .AssertAll();
+        }
+
+        [Test]
+        public void AllowMultipleWithoutSchemaAssertion()
+        {
+            _responseWithObject2
+                .TestStatus("first", code => code == 200)
+                .TestBody("secon1", body => body.id != null)
+                .AssertAll();
         }
 
         [Test]
@@ -88,13 +95,6 @@ namespace RA.Tests
             _responseWithNothing
                 .TestStatus("is-ok", x => x == 200)
                 .Assert("is-ok");
-        }
-
-        [Test]
-        public void NoSchemaShouldPass()
-        {
-            _responseWithObject
-                .AssertAll();
         }
 
         [Test]
@@ -161,7 +161,7 @@ namespace RA.Tests
         public void TestHeaderWithContentTypeUpperCased()
         {
             _responseWithObject
-                .TestHeader("content header has app/json upper", "CONTENT=TYPE", x => x == "application/json")
+                .TestHeader("content header has app/json upper", "CONTENT-TYPE", x => x == "application/json")
                 .Assert("content header has app/json upper");
         }
 
@@ -185,43 +185,6 @@ namespace RA.Tests
         }
 
         [Test]
-        public void TestV3InvalidSchema()
-        {
-            Assert.Throws<ArgumentException>(() =>
-            {
-                _responseWithObject
-                    .Schema(Resource.V3InvalidSchema);
-            });
-        }
-
-        [Test]
-        public void TestV3RestrictiveSchema()
-        {
-            Assert.Throws<AssertException>(() =>
-            {
-                _responseWithObject
-                    .Schema(Resource.V3RestrictiveSchema)
-                    .AssertSchema();
-            });
-        }
-
-        [Test]
-        public void TestV3ValidSchema()
-        {
-            _responseWithObject
-                .Schema(Resource.V3ValidSchema);
-            _responseWithObject.AssertAll();
-        }
-
-        [Test]
-        public void TestV4ValidSchema()
-        {
-            _responseWithObject
-                .Schema(Resource.V4ValidSchema);
-            _responseWithObject.AssertAll();
-        }
-
-        [Test]
         public void WriteAssertions()
         {
             _responseWithObject.WriteAssertions();
@@ -238,12 +201,14 @@ namespace RA.Tests
         }
 
         [Test]
-        public void AllowMultipleWithoutSchemaAssertion()
+        public void AccessingMissingNameShouldThrow()
         {
-            _responseWithObject
-                .TestStatus("first", code => code == 200)
-                .TestBody("second", body => body.id != null)
-                .AssertAll();
+            Assert.Throws<AssertException>(() =>
+            {
+                _responseWithObject
+                    .TestBody("should blow up", x => x.products[0].name == "")
+                    .Assert("should blow up");
+            });
         }
     }
 }

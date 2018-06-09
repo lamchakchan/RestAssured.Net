@@ -49,7 +49,7 @@ namespace RA.Tests
                 .Uri("/test");
 
             var httpContext = _setup.When();
-            // httpContext.SetUrl(null);
+            httpContext.SetUrl(null);
 
             Assert.AreEqual("localhost:1500", _setup.Host());
             Assert.AreEqual("http://localhost:1500/test", httpContext.Url());
@@ -65,7 +65,7 @@ namespace RA.Tests
                 .UseHttps();
 
             var httpContext = _setup.When();
-            // httpContext.SetUrl(null);
+            httpContext.SetUrl(null);
 
             Assert.AreEqual("localhost:1500", _setup.Host());
             Assert.AreEqual("https://localhost:1500/test", httpContext.Url());
