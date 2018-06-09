@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>RestAssured</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>Lam Chan</authors>
+    <owners>Lam Chan</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <projectUrl>https://github.com/lamchakchan/RestAssured.Net</projectUrl>
+    <iconUrl>https://github.com/lamchakchan/RestAssured.Net</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Easy to use REST interface tester</description>
+    <releaseNotes>.</releaseNotes>
+    <copyright>Copyright 2018</copyright>
+    <tags>REST unittest QA</tags>
+    <dependencies>
+      <group targetFramework="uap">
+          <dependency id="Newtonsoft.Json" version="11.0.2" />
+          <dependency id="Newtonsoft.Json.Schema" version="3.0.10" />
+          <dependency id="Microsoft.CSharp" version="4.5.0" />
+          <dependency id="Enumeration" version="2.0.0" />
+      </group>
+    </dependencies>
+  </metadata>
+  <!-- <files>
+    <file src="bin/Release/netstandard2.0/RA.dll" target="lib/netstandard2.0/RA.dll" />
+  </files> -->
+</package>
