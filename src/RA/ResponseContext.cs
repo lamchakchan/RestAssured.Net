@@ -37,6 +37,13 @@ namespace RA
         }
 
         /// <summary>
+        /// Retrieve the specified response header.
+        /// </summary>
+        /// <param name="name">The header name.</param>
+        /// <returns>The header value.</returns>
+        public string RetrieveHeader(string name) => HeaderValue(name);
+
+        /// <summary>
         /// Retrieve an object from the response document.
         /// </summary>
         /// <param name="func"></param>
