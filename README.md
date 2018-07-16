@@ -200,8 +200,8 @@ strategy for the body construct.
 3. Default to contents in Body.
 
 ## JSON Schema Support
-ResAssured leverages Newtonsoft.Json for its JSON parsing and JSON schema validation support.  
-Newtonsoft.Json on supports draft 3 and draft 4 of the JSON scheam specification, so we can too!
+RestAssured.Net leverages Newtonsoft.Json for its JSON parsing and JSON schema validation support.  
+Newtonsoft.Json supports draft 3 and draft 4 of the JSON scheam specification, so we can too!
 
 Utilize these tools to validate your JSON schema
 
