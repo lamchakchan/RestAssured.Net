@@ -8,6 +8,7 @@ using RA.Enums;
 using RA.Exceptions;
 using RA.Extensions;
 using System.Xml.Linq;
+using System.Net.Http;
 
 namespace RA
 {
@@ -34,6 +35,16 @@ namespace RA
             _loadResponses = loadResponses ?? new List<LoadResponse>();
 
             Initialize();
+        }
+
+        /// <summary>
+        /// Retrieve the specified headerName.
+        /// </summary>
+        /// <returns>Header.</returns>
+        /// <param name="headerName">Header name.</param>
+        public string RetrieveHeader(string headerName)
+        {
+            return HeaderValue(headerName);
         }
 
         /// <summary>
@@ -267,7 +278,7 @@ namespace RA
             }
 
             if (!string.IsNullOrEmpty(_content))
-                throw new Exception(string.Format("({0}) not supported", contentType));
+                throw new Exception(string.Format("Content type ({0}) not supported", contentType));
         }
 
         private void ParseLoad()
