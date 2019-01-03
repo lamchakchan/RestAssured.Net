@@ -151,7 +151,7 @@ namespace RA
 
             foreach (var queryString in _setupContext.Queries())
             {
-                query.Add(queryString.Key, queryString.Value);
+                query.Add(_setupContext.Queries());
             }
 
             builder.Query = query.ToString();
@@ -164,12 +164,32 @@ namespace RA
             _setupContext.HeaderAccept().ForEach(x => _httpClient.DefaultRequestHeaders.Add(HeaderType.Accept.Value, x));
             _setupContext.HeaderAcceptEncoding().ForEach(x => request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue(x)));
             _setupContext.HeaderAcceptCharset().ForEach(x => request.Headers.AcceptCharset.Add(new StringWithQualityHeaderValue(x)));
-            _setupContext.HeaderForEverythingElse().ForEach(x => request.Headers.Add(x.Key, x.Value));
+
+            var headersForEverythingElse = _setupContext.HeaderForEverythingElse();
+            foreach (string header in headersForEverythingElse)
+            {
+                request.Headers.Add(header, headersForEverythingElse.GetValues(header));
+            }
         }
 
 	    private void AppendCookies(HttpRequestMessage request)
 	    {
-		    request.Headers.Add("Cookie", string.Join(";", _setupContext.Cookies().Select(x => x.Key + "=" + x.Value)));
+            var cookies = _setupContext.Cookies();
+            if (cookies.Count == 0)
+            {
+                return;
+            }
+
+            var pairs = new List<string>();
+            foreach (string cookie in cookies)
+            {
+                foreach (var value in cookies.GetValues(cookie))
+                {
+                    pairs.Add($"{cookie}={value}");
+                }
+            }
+
+            request.Headers.Add("Cookie", string.Join("; ", pairs));
 		}
 
 	    private void SetTimeout()
