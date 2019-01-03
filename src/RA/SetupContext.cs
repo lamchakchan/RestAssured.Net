@@ -28,7 +28,11 @@ namespace RA
 
         private Func<string, NameValueCollection, List<string>> GetHeaderFor = (filter, headers) =>
         {
-            var values = headers.GetValues(filter);
+            var values = headers
+                .GetValues(filter)
+                ?.First()
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(v => v.Trim());
 
             return values != null
                 ? values.ToList()
