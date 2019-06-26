@@ -1,20 +1,18 @@
 namespace RA
 {
-    public class FileContent
+    public class FormContent
     {
-        public FileContent(string name, string fileName, string contentDispositionName, string contentType, byte[] content)
+        public FormContent(string name, string content, string contentDispositionName = "form-data", string contentType = "multipart/form-data")
         {
             Name = name;
-            FileName = fileName;
+            Content = content;
             ContentType = contentType;
             ContentDispositionName = contentDispositionName;
-            Content = content;
         }
 
         public string Name { get; private set; }
-        public string FileName { get; private set; }
+        public string Content { get; private set; }
         public string ContentType { get; private set; }
         public string ContentDispositionName { get; private set; }
-        public byte[] Content { get; private set; }
     }
 }

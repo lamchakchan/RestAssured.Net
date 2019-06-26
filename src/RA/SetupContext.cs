@@ -23,7 +23,8 @@ namespace RA
         private readonly Dictionary<string, string> _queryStrings = new Dictionary<string, string>();
 		private readonly Dictionary<string, string> _cookies = new Dictionary<string, string>();
         private readonly List<FileContent> _files = new List<FileContent>();
-	    private TimeSpan? _timeout = null;
+        private readonly List<FormContent> _forms = new List<FormContent>();
+        private TimeSpan? _timeout = null;
 
         private Func<string, IDictionary<string, string>, List<string>> GetHeaderFor = (filter, headers) =>
         {
@@ -177,14 +178,55 @@ namespace RA
         /// Set a file to be used with a POST/PUT/DELETE action.  Adding a file will convert the body
         /// to a multipart/form.
         /// </summary>
+        /// <param name="name">Name of multipart data. Generally this name is same as the name of the variable in the bean clas to find the file content to.</param>
         /// <param name="fileName">Name of file</param>
         /// <param name="contentDispositionName"></param>
         /// <param name="contentType">eg: image/jpeg or application/octet-stream</param>
         /// <param name="content">Byte array of the data.  File.ReadAllBytes()</param>
         /// <returns></returns>
-        public SetupContext File(string fileName, string contentDispositionName, string contentType, byte[] content)
+        public SetupContext File(string name, string fileName, string contentDispositionName, string contentType, byte[] content)
         {
-            _files.Add(new FileContent(fileName, contentDispositionName, contentType, content));
+            _files.Add(new FileContent(name, fileName, contentDispositionName, contentType, content));
+            return this;
+        }
+
+        /// <summary>
+        /// Set form content to be used with a POST/PUT/DELETE action.
+        /// </summary>
+        /// <param name="name">Name of form content</param>
+        /// <param name="content">Form content</param>
+        /// <returns></returns>
+        public SetupContext Form(string name, string content)
+        {
+            _forms.Add(new FormContent(name, content));
+            return this;
+        }
+
+        /// <summary>
+        /// Set form content to be used with a POST/PUT/DELETE action.
+        /// </summary>
+        /// <param name="name">Name of form content</param>
+        /// <param name="content">Form content</param>
+        /// <returns></returns>
+        public SetupContext Form(string name, object content)
+        {
+            var contentAsString = JsonConvert.SerializeObject(content);
+            _forms.Add(new FormContent(name, contentAsString));
+            return this;
+        }
+
+        /// <summary>
+        /// Set form content to be used with a POST/PUT/DELETE action.
+        /// </summary>
+        /// <param name="name">Name of form content</param>
+        /// <param name="content">Form content</param>
+        /// <param name="contentDispositionName"></param>
+        /// <param name="contentType">eg: application/json - this may only be needed if you are sending json and files in mutipart-form content</param>
+        /// <returns></returns>
+        public SetupContext Form(string name, object content, string contentDispositionName, string contentType)
+        {
+            var contentAsString = JsonConvert.SerializeObject(content);
+            _forms.Add(new FormContent(name, contentAsString, contentDispositionName, contentType));
             return this;
         }
 
@@ -194,17 +236,26 @@ namespace RA
         /// <returns></returns>
         public List<FileContent> Files()
         {
-            return _files.Select(x => new FileContent(x.FileName, x.ContentDispositionName, x.ContentType, x.Content)).ToList();
+            return _files.Select(x => new FileContent(x.Name, x.FileName, x.ContentDispositionName, x.ContentType, x.Content)).ToList();
         }
 
-		/// <summary>
-		/// Set a cookie value pair.
-		/// eg: name : X-XSRF-TOKEN and value : 123456789
-		/// </summary>
-		/// <param name="name"></param>
-		/// <param name="value"></param>
-		/// <returns></returns>
-		public SetupContext Cookie(string name, string value)
+        /// <summary>
+        /// Returns all forms.
+        /// </summary>
+        /// <returns></returns>
+        public List<FormContent> Forms()
+        {
+            return _forms.Select(x => new FormContent(x.Name, x.Content, x.ContentDispositionName, x.ContentType)).ToList();
+        }
+
+        /// <summary>
+        /// Set a cookie value pair.
+        /// eg: name : X-XSRF-TOKEN and value : 123456789
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public SetupContext Cookie(string name, string value)
 	    {
 		    if(!_cookies.ContainsKey(name))
 				_cookies.Add(name, value);
@@ -465,7 +516,7 @@ namespace RA
 
             foreach (var file in _files)
             {
-                setupContext.File(file.FileName, file.ContentDispositionName, file.ContentType, file.Content);
+                setupContext.File(file.Name, file.FileName, file.ContentDispositionName, file.ContentType, file.Content);
             }
 
             return setupContext;

@@ -186,7 +186,7 @@ namespace RA
 
         private HttpContent BuildContent()
         {
-            if (_setupContext.Files().Any())
+            if (_setupContext.Files().Any() || _setupContext.Forms().Any())
                 return BuildMultipartContent();
             if (_setupContext.Params().Any())
                 return BuildFormContent();
@@ -205,14 +205,24 @@ namespace RA
             _setupContext.Files().ForEach(x =>
             {
                 var fileContent = new ByteArrayContent(x.Content);
-                fileContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
+                fileContent.Headers.ContentDisposition = new ContentDispositionHeaderValue(x.ContentDispositionName)
                 {
-                    Name = x.ContentDispositionName.Quote(),
+                    Name = x.Name.Quote(),
                     FileName = x.FileName
                 };
                 fileContent.Headers.ContentType = new MediaTypeHeaderValue(x.ContentType);
-
                 content.Add(fileContent);
+            });
+
+            _setupContext.Forms().ForEach(x =>
+            {
+                var formContent = new StringContent(x.Content);
+                formContent.Headers.ContentDisposition = new ContentDispositionHeaderValue(x.ContentDispositionName)
+                {
+                    Name = x.Name.Quote(),
+                };
+                formContent.Headers.ContentType = new MediaTypeHeaderValue(x.ContentType);
+                content.Add(formContent);
             });
 
             return content;
@@ -294,15 +304,29 @@ namespace RA
         {
             // var content = AsyncContext.Run(async () => await result.Response.Content.ReadAsStringAsync());
             var content = result.Response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-
+            var responseHeaders = GetResponseHeaders(result);
             return new ResponseContext(
                 result.Response.StatusCode,
                 content,
-                result.Response.Content.Headers.ToDictionary(x => x.Key.Trim(), x => x.Value),
+                responseHeaders,
                 result.ElaspedExecution,
                 _loadReponses.ToList()
                 );
+        }
 
+        /// <summary>
+        /// Gets the response headers from HTTP response from API.
+        /// </summary>
+        /// <returns>The response headers.</returns>
+        /// <param name="result">Dictionary containing API response headers</param>
+        private Dictionary<string, IEnumerable<string>> GetResponseHeaders(HttpResponseMessageWrapper result)
+        {
+            var responseHeaders = result.Response.Headers.ToDictionary(x => x.Key.Trim(), x => x.Value);
+            foreach (var contentHeader in result.Response.Content.Headers.ToDictionary(x => x.Key.Trim(), x => x.Value))
+            {
+                responseHeaders.Add(contentHeader.Key, contentHeader.Value);
+            }
+            return responseHeaders;
         }
 
         /// <summary>
@@ -313,6 +337,8 @@ namespace RA
         {
             var uri = BuildUri();
 
+            "method".WriteHeader();
+            _httpActionContext.HttpAction().ToString().WriteLine();
             "host".WriteHeader();
             uri.Host.WriteLine();
             "absolute path".WriteHeader();
@@ -327,7 +353,6 @@ namespace RA
             uri.OriginalString.WriteLine();
             "scheme".WriteHeader();
             uri.Scheme.WriteLine();
-
             return this;
         }
     }
