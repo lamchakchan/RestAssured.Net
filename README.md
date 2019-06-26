@@ -76,7 +76,16 @@ The call chains are structured around 4 main parts.
 
     //Add a file as part of the request.  Doing so will convert the body to a multipart/form request.  Used for POST, PUT and DELETE
     //eg: "file name", "file", "image/jpeg", File.ReadAllBytes("pathtofile")
-    .File("string", "string", "string", byte[])
+    .File("name", "string", "string", "string", byte[])
+
+    // Add the string content to form data as part of the request. It will use the default values of Content-Desposition.
+    .Form("string", "string content")
+
+    // Add the object content to form data as part of the request. Object will be converted into JSON and added to request.
+    .Form("string", object)
+
+    // Add the object content to form data as part of the request. Object will be converted into JSON and added to request. You can explicitly define the content type and desposition.
+    .Form(string name, object content, string contentDispositionName, string contentType)
 
     //Set the host of the target server
     //Useful when you want to reuse a test suite between multiple Uris
@@ -299,6 +308,23 @@ new RestAssured()
         //Third parameter describes the content type that is being added in the byte array
         //Fourth parameter the byte array of content
         .File("fileName", "file", "images/jpeg", File.ReadAllBytes(@"c:\path\to\image"))
+    .When()
+        .Post("http://yourremote.com")
+    .Then()
+        .Debug()
+```
+
+### Using Form
+```C#
+new RestAssured()
+    .Given()
+        .Name("Sending form data")
+        .Param("id", "some identifier")
+        //First parameter is variable name of content being sent in form-data.
+        //Second parameter is the content to be sent. This content will be converted into JSON before being attached to form-data.
+        //Third parameter describes the Content-Desposition
+        //Fourth parameter describes the Content-Type
+        .Form("name", content, "form-data", "multipart/form-data")
     .When()
         .Post("http://yourremote.com")
     .Then()

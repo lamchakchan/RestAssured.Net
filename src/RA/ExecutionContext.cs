@@ -186,7 +186,7 @@ namespace RA
 
         private HttpContent BuildContent()
         {
-            if (_setupContext.Files().Any())
+            if (_setupContext.Files().Any() || _setupContext.Forms().Any())
                 return BuildMultipartContent();
             if (_setupContext.Params().Any())
                 return BuildFormContent();
@@ -205,14 +205,24 @@ namespace RA
             _setupContext.Files().ForEach(x =>
             {
                 var fileContent = new ByteArrayContent(x.Content);
-                fileContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
+                fileContent.Headers.ContentDisposition = new ContentDispositionHeaderValue(x.ContentDispositionName)
                 {
-                    Name = x.ContentDispositionName.Quote(),
+                    Name = x.Name.Quote(),
                     FileName = x.FileName
                 };
                 fileContent.Headers.ContentType = new MediaTypeHeaderValue(x.ContentType);
-
                 content.Add(fileContent);
+            });
+
+            _setupContext.Forms().ForEach(x =>
+            {
+                var formContent = new StringContent(x.Content);
+                formContent.Headers.ContentDisposition = new ContentDispositionHeaderValue(x.ContentDispositionName)
+                {
+                    Name = x.Name.Quote(),
+                };
+                formContent.Headers.ContentType = new MediaTypeHeaderValue(x.ContentType);
+                content.Add(formContent);
             });
 
             return content;
