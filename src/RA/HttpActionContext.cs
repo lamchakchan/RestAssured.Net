@@ -165,7 +165,15 @@ namespace RA
 
         public void SetUrl(string url)
         {
-            if (url.IsEmpty() && _setupContext.Host().IsEmpty())
+	    if(!new System.Text.RegularExpressions.Regex(@":[0-9]{1,4}").IsMatch(url) && _setupContext.PortSpecified())
+            {
+                if (new System.Text.RegularExpressions.Regex(@"https?:\/\/").IsMatch(url))
+                    url = url.Substring(0, url.IndexOf("/", 8)) + ":3005" + url.Substring(url.IndexOf("/", 8));
+                else
+                    url = url.Substring(0, url.IndexOf("/")) + ":3005" + url.Substring(url.IndexOf("/"));
+            }
+
+    		if (url.IsEmpty() && _setupContext.Host().IsEmpty())
                 throw new ArgumentException("url must be provided");
 
             var uri = url.IsNotEmpty()
