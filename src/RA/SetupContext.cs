@@ -91,7 +91,7 @@ namespace RA
             return PortSpecified() ? $"{_host}:{_port}":_host;
         }
 
-        private bool PortSpecified()
+        internal bool PortSpecified()
         {
             return _port > 0 && _port != 88;
         }
