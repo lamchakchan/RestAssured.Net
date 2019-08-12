@@ -220,54 +220,83 @@ namespace RA
             ParseLoad();
         }
 
-        private void Parse()
+        /// <summary>
+        /// Holds response parser functions
+        /// </summary>
+        private static Dictionary<string, Func<string, dynamic>> parsers = new Dictionary<string, Func<string, dynamic>>()
         {
-            var contentType = ContentType();
-
-            if (contentType.Contains("json"))
-            {
-                if (!string.IsNullOrEmpty(_content))
+            { "json",  delegate(string instr)
                 {
                     try
                     {
-                        _parsedContent = JObject.Parse(_content);
-                        return;
+                        return JObject.Parse(instr);
                     }
                     catch
                     {
+                        try
+                        {
+                            return JArray.Parse(instr);
+                        }
+                        catch(Exception e)
+                        {
+                            throw e;
+                        }
                     }
-
+                }
+            },
+            { "xml",  delegate(string instr)
+                {
                     try
                     {
-                        _parsedContent = JArray.Parse(_content);
+                        return XDocument.Parse(instr);
+                    }
+                    catch(Exception e)
+                    {
+                        throw e;
+                    }
+                }
+            },
+        };
+
+        /// <summary>
+        /// Adds Parser to allow unsupporter response types to be parsed
+        /// </summary>
+        /// <param name="type">Content-Type to use provided function to parse</param>
+        /// <param name="func">Function to parse type</param>
+        internal static void AddParser(string type, Func<string, dynamic> func)
+        {
+            if (parsers.ContainsKey(type))
+                parsers[type] = func;
+            else
+                parsers.Add(type, func);
+        }
+
+        private void Parse()
+        {
+            if (string.IsNullOrEmpty(_content))
+                return;
+
+            var contentType = ContentType();
+
+            foreach (var type in parsers.Keys)
+            {
+                if (contentType.Contains(type))
+                {
+                    try
+                    {
+                        _parsedContent = parsers[type](_content);
                         return;
                     }
                     catch
                     {
+                        throw new Exception(string.Format("{0} parser failed to build json from data", type));
                     }
                 }
                 else
                 {
-                    return;
+                    throw new Exception(string.Format("({0}) not supported", contentType));
                 }
             }
-            else if (contentType.Contains("xml"))
-            {
-                if (!string.IsNullOrEmpty(_content))
-                {
-                    try
-                    {
-                        _parsedContent = XDocument.Parse(_content);
-                        return;
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
-
-            if (!string.IsNullOrEmpty(_content))
-                throw new Exception(string.Format("({0}) not supported", contentType));
         }
 
         private void ParseLoad()
