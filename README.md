@@ -211,6 +211,19 @@ Utilize these tools to validate your JSON schema
 
 ## More Examples
 
+### Add new response type parser
+RestAssured can already parse JSON and XML response bodies, however you are able to overwrite
+these with your own parsing functions or add new parsing functionality.
+```C#
+//Create a method to parse your input
+public static dynamic CsvToJson(string input)
+{
+    // Code to parse csv string to JObject
+}
+//Then inside main method you add this parser
+RestAssured.AddParser("csv",CsvToJson);
+```
+
 ### Breaking up a call chain
 ```C#
 //Create a new test suite
