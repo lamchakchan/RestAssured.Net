@@ -185,6 +185,14 @@ namespace RA.Tests
         }
 
         [Test]
+        public void TestLoadForSuccessPercentageCall()
+        {
+            _responseWithObject
+                .TestLoad("load for success average", "success-percent", x => x > 0 && x <= 1)
+                .Assert("load for success average");
+        }
+
+        [Test]
         public void WriteAssertions()
         {
             _responseWithObject.WriteAssertions();
