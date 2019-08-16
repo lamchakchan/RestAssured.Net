@@ -275,6 +275,7 @@ namespace RA
             if (_loadResponses.Any())
             {
                 _loadValues.Add(LoadValueTypes.TotalCall.Value, _loadResponses.Count);
+                _loadValues.Add(LoadValueTypes.SuccessPercent.Value, _loadResponses.Count(x => x.StatusCode == (int)HttpStatusCode.OK)/_loadResponses.Count);
                 _loadValues.Add(LoadValueTypes.TotalSucceeded.Value, _loadResponses.Count(x => x.StatusCode == (int)HttpStatusCode.OK));
                 _loadValues.Add(LoadValueTypes.TotalLost.Value, _loadResponses.Count(x => x.StatusCode == -1));
                 _loadValues.Add(LoadValueTypes.AverageTTLMs.Value, new TimeSpan((long)_loadResponses.Where(x => x.StatusCode == (int)HttpStatusCode.OK).Average(x => x.Ticks)).TotalMilliseconds);
