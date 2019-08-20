@@ -149,12 +149,9 @@ namespace RA
             var builder = new UriBuilder(_httpActionContext.Url());
             var query = HttpUtility.ParseQueryString(builder.Query);
 
-            foreach (var queryString in _setupContext.Queries())
-            {
-                query.Add(_setupContext.Queries());
-            }
+            query.Add(_setupContext.Queries());
 
-            builder.Query = query.ToString();
+            builder.Query = query.ToQueryString();
             return new Uri(builder.ToString());
         }
 
