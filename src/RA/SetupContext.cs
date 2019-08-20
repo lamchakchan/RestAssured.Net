@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -18,25 +19,25 @@ namespace RA
         private string _body;
         private HttpClient _httpClient;
         private bool _useHttps;
-        private readonly Dictionary<string, string> _headers = new Dictionary<string, string>();
         private readonly Dictionary<string, string> _parameters = new Dictionary<string, string>();
-        private readonly Dictionary<string, string> _queryStrings = new Dictionary<string, string>();
-		private readonly Dictionary<string, string> _cookies = new Dictionary<string, string>();
+        private readonly NameValueCollection _headers = new NameValueCollection();
+        private readonly NameValueCollection _queryStrings = new NameValueCollection();
+		private readonly NameValueCollection _cookies = new NameValueCollection();
         private readonly List<FileContent> _files = new List<FileContent>();
 	    private TimeSpan? _timeout = null;
 
-        private Func<string, IDictionary<string, string>, List<string>> GetHeaderFor = (filter, headers) =>
+        private Func<string, NameValueCollection, List<string>> GetHeaderFor = (filter, headers) =>
         {
-            var value =
-                headers.Where(x => x.Key.Equals(filter, StringComparison.InvariantCultureIgnoreCase))
-                    .Select(x => x.Value)
-                    .DefaultIfEmpty(string.Empty)
-                    .First();
+            var values = headers
+                .GetValues(filter)
+                ?.First()
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(v => v.Trim());
 
-            return !string.IsNullOrEmpty(value) ? value.Split(new[] { ',' }).Select(x => x.Trim()).ToList() : new List<string>();
+            return values != null
+                ? values.ToList()
+                : new List<string>(0);
         };
-
-
 
         /// <summary>
         /// Setup the name of the test suite.
@@ -206,8 +207,7 @@ namespace RA
 		/// <returns></returns>
 		public SetupContext Cookie(string name, string value)
 	    {
-		    if(!_cookies.ContainsKey(name))
-				_cookies.Add(name, value);
+            _cookies.Add(name, value);
 		    return this;
 	    }
 
@@ -221,19 +221,31 @@ namespace RA
 	    {
 		    foreach (var cookie in cookies)
 		    {
-				if (!_cookies.ContainsKey(cookie.Key))
-					_cookies.Add(cookie.Key, cookie.Value);
+                _cookies.Add(cookie.Key, cookie.Value);
 			}
+
 		    return this;
 	    }
+
+        /// <summary>
+        /// Set cookie value pair.
+        /// eg: name : X-XSRF-TOKEN and value : 123456789
+        /// </summary>
+        /// <param name="cookies"></param>
+        /// <returns></returns>
+        public SetupContext Cookies(NameValueCollection cookies)
+        {
+            _cookies.Add(cookies);
+            return this;
+        }
 
 	    /// <summary>
 	    /// Return all cookies.
 	    /// </summary>
 	    /// <returns></returns>
-	    public Dictionary<string, string> Cookies()
+	    public NameValueCollection Cookies()
 	    {
-		    return _cookies.Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToDictionary(x => x.Key, x => x.Value);
+            return new NameValueCollection(_cookies);
 	    }
 
 		/// <summary>
@@ -245,8 +257,7 @@ namespace RA
 		/// <returns></returns>
 		public SetupContext Header(string key, string value)
         {
-            if (!_headers.ContainsKey(key))
-                _headers.Add(key, value);
+            _headers.Add(key, value);
             return this;
         }
 
@@ -259,20 +270,30 @@ namespace RA
 	    {
 		    foreach (var header in headers)
 		    {
-			    if (!_headers.ContainsKey(header.Key))
-				    _headers.Add(header.Key, header.Value);
+                _headers.Add(header.Key, header.Value);
 		    }
 
 		    return this;
 	    }
 
-		/// <summary>
-		/// Return all headers.
-		/// </summary>
-		/// <returns></returns>
-		public Dictionary<string, string> Headers()
+        /// <summary>
+        /// Sets multiple Http request header value pairs.
+        /// </summary>
+        /// <param name="headers"></param>
+        /// <returns></returns>
+        public SetupContext Headers(NameValueCollection headers)
         {
-            return _headers.Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToDictionary(x => x.Key, x => x.Value);
+            _headers.Add(headers);
+            return this;
+        }
+
+        /// <summary>
+        /// Return all headers.
+        /// </summary>
+        /// <returns></returns>
+        public NameValueCollection Headers()
+        {
+            return new NameValueCollection(_headers);
         }
 
         /// <summary>
@@ -315,14 +336,20 @@ namespace RA
         /// Return all headers except for content-type, accept, accept-encoding and accept-charset
         /// </summary>
         /// <returns></returns>
-        public Dictionary<string, string> HeaderForEverythingElse()
+        public NameValueCollection HeaderForEverythingElse()
         {
-            return
-                _headers.Where(
-                    x =>
-                        !HeaderType.GetAll()
-                            .Any(y => y.Value.Equals(x.Key, StringComparison.InvariantCultureIgnoreCase)))
-                    .ToDictionary(x => x.Key, x => x.Value);
+            var keepHeaders = _headers.AllKeys.Except(HeaderType.GetAll().Select(t => t.Value));
+
+            var headers = new NameValueCollection();
+            foreach (var header in keepHeaders)
+            {
+                foreach (var value in _headers.GetValues(header))
+                {
+                    headers.Add(header, value);
+                }
+            }
+
+            return headers;
         }
 
         /// <summary>
@@ -373,13 +400,12 @@ namespace RA
         /// <returns></returns>
         public SetupContext Query(string key, string value)
         {
-            if (!_queryStrings.ContainsKey(key))
-                _queryStrings.Add(key, value);
+            _queryStrings.Add(key, value);
             return this;
         }
 
 	    /// <summary>
-	    /// Set multiple Querystring value pairs.  This is any key/value pairs that needs to go into the Url.  This will be emitted with all Http verbs.
+	    /// Set multiple Querystring value pairs. This is any key/value pairs that needs to go into the Url.  This will be emitted with all Http verbs.
 	    /// </summary>
 	    /// <param name="key"></param>
 	    /// <param name="value"></param>
@@ -388,19 +414,31 @@ namespace RA
 	    {
 		    foreach (var query in queries)
 		    {
-				if (!_queryStrings.ContainsKey(query.Key))
-					_queryStrings.Add(query.Key, query.Value);
+                _queryStrings.Add(query.Key, query.Value);
 			}
+
 		    return this;
 		}
+
+        /// <summary>
+	    /// Set multiple Querystring value pairs. This is any key/value pairs that needs to go into the Url.  This will be emitted with all Http verbs.
+	    /// </summary>
+	    /// <param name="key"></param>
+	    /// <param name="value"></param>
+	    /// <returns></returns>
+		public SetupContext Queries(NameValueCollection queries)
+        {
+            _queryStrings.Add(queries);
+            return this;
+        }
 
         /// <summary>
         /// Return Querystring value pairs.
         /// </summary>
         /// <returns></returns>
-        public Dictionary<string, string> Queries()
+        public NameValueCollection Queries()
         {
-            return _queryStrings.Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToDictionary(x => x.Key, x => x.Value);
+            return new NameValueCollection(_queryStrings);
         }
 
         public SetupContext HttpClient(HttpClient client)
@@ -490,15 +528,21 @@ namespace RA
             "{0}\n".Write(_body);
 
             "request headers".WriteHeader();
-            foreach (var header in _headers)
+            foreach (string key in _headers)
             {
-                "{0} : {1}".WriteLine(header.Key, header.Value);
+                "{0} : {1}".WriteLine(key, _headers[key].ToString());
             }
 
             "querystrings".WriteHeader();
-            foreach (var queryString in _queryStrings)
+            foreach (string queryString in _queryStrings)
             {
-                "{0} : {1}".WriteLine(queryString.Key, queryString.Value);
+                "{0} : {1}".WriteLine(queryString, _queryStrings[queryString]);
+            }
+
+            "cookies".WriteHeader();
+            foreach (string cookie in _cookies)
+            {
+                "{0} : {1}".WriteLine(cookie, _cookies[cookie]);
             }
 
             "parameters".WriteHeader();
