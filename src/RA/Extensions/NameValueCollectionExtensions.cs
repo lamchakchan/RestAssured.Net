@@ -1,5 +1,4 @@
 ﻿using System.Collections.Specialized;
-using System.Linq;
 using System.Text;
 using System.Web;
 
@@ -9,21 +8,35 @@ namespace RA.Extensions
     {
         public static string ToQueryString(this NameValueCollection nvc)
         {
-            int count = nvc.Count;
-            if (count == 0)
-                return "";
-            StringBuilder sb = new StringBuilder();
+            if (nvc == null || nvc.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            var sb = new StringBuilder();
+
             string[] keys = nvc.AllKeys;
+            for (int i = 0; i < nvc.Count; i++)
+            {
+                string[] values = nvc.GetValues(keys[i]);
+                if (values != null)
+                {
+                    foreach (string value in values)
+                    {
+                        if (string.IsNullOrEmpty(keys[i]))
+                        {
+                            sb.AppendFormat("{0}&", HttpUtility.UrlEncode(value));
+                        }
+                        else
+                        {
+                            sb.AppendFormat("{0}={1}&", keys[i], HttpUtility.UrlEncode(value));
+                        }
+                    }
+                }
+            }
 
-            var items = nvc.AllKeys.SelectMany(nvc.GetValues, (k, v) => new { key = k, value = v });
-            foreach (var item in items)
-                sb.AppendFormat("{0}={1}&", item.key, HttpUtility.UrlEncode(item.value, Encoding.UTF8));
-
-            if (sb.Length > 0)
-                sb.Length--;
-            return sb.ToString();
+            // trim trailing `&`
+            return sb.ToString(0, sb.Length - 1);
         }
-
-
     }
 }
