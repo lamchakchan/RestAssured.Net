@@ -245,6 +245,17 @@ namespace RA
                     catch
                     {
                     }
+
+                    try
+                    {
+                        _parsedContent = JContainer.Parse(_content);
+                        return;
+                    }
+                    catch
+                    {
+                    }
+
+
                 }
                 else
                 {
