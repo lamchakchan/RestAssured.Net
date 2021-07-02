@@ -21,7 +21,7 @@ namespace RA
         private readonly SetupContext _setupContext;
         private readonly HttpActionContext _httpActionContext;
         private readonly HttpClient _httpClient;
-        private ConcurrentQueue<LoadResponse> _loadReponses = new ConcurrentQueue<LoadResponse>();
+        private ConcurrentQueue<LoadResponse> _loadResponses = new ConcurrentQueue<LoadResponse>();
 
         public ExecutionContext(SetupContext setupContext, HttpActionContext httpActionContext)
         {
@@ -272,7 +272,7 @@ namespace RA
         public async Task MapCall()
         {
             var loadResponse = new LoadResponse(-1, -1);
-            _loadReponses.Enqueue(loadResponse);
+            _loadResponses.Enqueue(loadResponse);
 
             var result = await ExecuteCall();
             loadResponse.StatusCode = (int)result.Response.StatusCode;
@@ -300,7 +300,7 @@ namespace RA
                 content,
                 headers,
                 result.ElaspedExecution,
-                _loadReponses.ToList());
+                _loadResponses.ToList());
         }
 
         private static Dictionary<string, IEnumerable<string>> GetHeaders(HttpResponseMessageWrapper result)
