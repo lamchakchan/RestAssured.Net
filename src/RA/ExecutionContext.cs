@@ -21,7 +21,7 @@ namespace RA
         private readonly SetupContext _setupContext;
         private readonly HttpActionContext _httpActionContext;
         private readonly HttpClient _httpClient;
-        private ConcurrentQueue<LoadResponse> _loadReponses = new ConcurrentQueue<LoadResponse>();
+        private ConcurrentQueue<LoadResponse> _loadResponses = new ConcurrentQueue<LoadResponse>();
 
         public ExecutionContext(SetupContext setupContext, HttpActionContext httpActionContext)
         {
@@ -272,7 +272,7 @@ namespace RA
         public async Task MapCall()
         {
             var loadResponse = new LoadResponse(-1, -1);
-            _loadReponses.Enqueue(loadResponse);
+            _loadResponses.Enqueue(loadResponse);
 
             var result = await ExecuteCall();
             loadResponse.StatusCode = (int)result.Response.StatusCode;
@@ -292,17 +292,29 @@ namespace RA
 
         private ResponseContext BuildFromResponse(HttpResponseMessageWrapper result)
         {
-            // var content = AsyncContext.Run(async () => await result.Response.Content.ReadAsStringAsync());
             var content = result.Response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            var headers = GetHeaders(result);
 
             return new ResponseContext(
                 result.Response.StatusCode,
                 content,
-                result.Response.Content.Headers.ToDictionary(x => x.Key.Trim(), x => x.Value),
+                headers,
                 result.ElaspedExecution,
-                _loadReponses.ToList()
-                );
+                _loadResponses.ToList());
+        }
 
+        private static Dictionary<string, IEnumerable<string>> GetHeaders(HttpResponseMessageWrapper result)
+        {
+            var headers = result.Response.Headers.ToDictionary(x => x.Key.Trim(), x => x.Value);
+            var contentHeaders = result.Response.Content.Headers.ToDictionary(x => x.Key.Trim(), x => x.Value);
+
+            foreach (var contentHeader in contentHeaders)
+            {
+                if(!headers.ContainsKey(contentHeader.Key))
+                    headers.Add(contentHeader.Key, contentHeader.Value);
+            }
+
+            return headers;
         }
 
         /// <summary>
