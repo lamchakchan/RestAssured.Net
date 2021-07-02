@@ -32,23 +32,21 @@ namespace RA.Tests
                 "{\"key\":\"AK\", \"value\":\"Alaska\"}" +
                 "]";
 
-            var header = new Dictionary<string, IEnumerable<string>>
+            var headers = new Dictionary<string, IEnumerable<string>>
             {
-                {
-                    "Content-Type",
-                    new List<string> {"application/json"}
-                }
+                {"Content-Type", new List<string> {"application/json"}},
+                {"Date", new List<string> {"Fri, 02 Jul 2021 10:29:50 GMT"}}
             };
 
             var emptyHeader = new Dictionary<string, IEnumerable<string>>();
 
 
             var loadResults = new List<LoadResponse> {new LoadResponse(200, 78978078)};
-            _responseWithObject = new ResponseContext(HttpStatusCode.OK, responseObjectContent, header,
+            _responseWithObject = new ResponseContext(HttpStatusCode.OK, responseObjectContent, headers,
                 _mockElapsedTimespan, loadResults);
-            _responseWithObject2 = new ResponseContext(HttpStatusCode.OK, responseObjectContent, header,
+            _responseWithObject2 = new ResponseContext(HttpStatusCode.OK, responseObjectContent, headers,
                 _mockElapsedTimespan, loadResults);
-            _responseWithArray = new ResponseContext(HttpStatusCode.OK, responseArrayContent, header,
+            _responseWithArray = new ResponseContext(HttpStatusCode.OK, responseArrayContent, headers,
                 _mockElapsedTimespan, loadResults);
             _responseWithNothing = new ResponseContext(HttpStatusCode.OK, "", emptyHeader, _mockElapsedTimespan,
                 loadResults);
@@ -163,6 +161,22 @@ namespace RA.Tests
             _responseWithObject
                 .TestHeader("content header has app/json upper", "CONTENT-TYPE", x => x == "application/json")
                 .Assert("content header has app/json upper");
+        }
+
+        [Test]
+        public void TestHeaderWithDateUpperCased()
+        {
+            _responseWithObject
+                .TestHeader("content header has DATE upper", "DATE", x => x == "Fri, 02 Jul 2021 10:29:50 GMT")
+                .Assert("content header has date upper");
+        }
+
+        [Test]
+        public void TestHeaderWithDateLowerCased()
+        {
+            _responseWithObject
+                .TestHeader("content header has date upper", "date", x => x == "Fri, 02 Jul 2021 10:29:50 GMT")
+                .Assert("content header has date upper");
         }
 
         [Test]

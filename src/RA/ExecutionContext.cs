@@ -292,17 +292,29 @@ namespace RA
 
         private ResponseContext BuildFromResponse(HttpResponseMessageWrapper result)
         {
-            // var content = AsyncContext.Run(async () => await result.Response.Content.ReadAsStringAsync());
             var content = result.Response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            var headers = GetHeaders(result);
 
             return new ResponseContext(
                 result.Response.StatusCode,
                 content,
-                result.Response.Content.Headers.ToDictionary(x => x.Key.Trim(), x => x.Value),
+                headers,
                 result.ElaspedExecution,
-                _loadReponses.ToList()
-                );
+                _loadReponses.ToList());
+        }
 
+        private static Dictionary<string, IEnumerable<string>> GetHeaders(HttpResponseMessageWrapper result)
+        {
+            var headers = result.Response.Headers.ToDictionary(x => x.Key.Trim(), x => x.Value);
+            var contentHeaders = result.Response.Content.Headers.ToDictionary(x => x.Key.Trim(), x => x.Value);
+
+            foreach (var contentHeader in contentHeaders)
+            {
+                if(!headers.ContainsKey(contentHeader.Key))
+                    headers.Add(contentHeader.Key, contentHeader.Value);
+            }
+
+            return headers;
         }
 
         /// <summary>
