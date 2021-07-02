@@ -1,5 +1,4 @@
 ﻿using NUnit.Framework;
-// using RA.Tests.Data;
 
 namespace RA.Tests
 {
@@ -13,11 +12,11 @@ namespace RA.Tests
                 .Given()
                     .Name("JsonIP")
 				.When()
-                    .Get("http://geoip.nekudo.com/api/")
+                    .Get("https://api.publicapis.org/entries")
                 .Then()
                     .Debug()
-                    .TestBody("ip exist", x => x.ip != null)
-                    .Assert("ip exist");
+                    .TestBody("entries exist", x => x.entries != null)
+                    .Assert("entries exist");
         }
     }
 
