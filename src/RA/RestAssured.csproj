@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageReference Include="Enumeration" Version="2.0.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
-    <PackageReference Include="newtonsoft.json" Version="11.0.2" />
+    <PackageReference Include="newtonsoft.json" Version="13.0.1" />
     <PackageReference Include="newtonsoft.json.schema" Version="3.0.10" />
   </ItemGroup>
 
